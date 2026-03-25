@@ -1,0 +1,87 @@
+############################
+# Build Folders
+############################
+bin/
+obj/
+out/
+
+############################
+# User-specific files
+############################
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+############################
+# Visual Studio
+############################
+.vs/
+*.rsuser
+
+############################
+# Rider
+.idea/
+
+############################
+# VS Code
+.vscode/
+
+############################
+# Logs
+############################
+*.log
+
+############################
+# ASP.NET Core
+############################
+appsettings.Development.json
+appsettings.*.json.local
+
+############################
+# Secrets
+############################
+secrets.json
+*.env
+
+############################
+# Publish output
+############################
+publish/
+wwwroot/dist/
+
+############################
+# Entity Framework
+############################
+Migrations/*.Designer.cs
+Migrations/*Snapshot.cs
+
+############################
+# OS Files
+############################
+.DS_Store
+Thumbs.db
+
+############################
+# Node (if frontend added later)
+############################
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+############################
+# MAUI / Xamarin (future proofing)
+############################
+*.pfx
+*.keystore
+*.mobileprovision
+############################
+# GitHub Copilot
+############################
+.copilot/
+copilot/
+*.copilot
+.copilot-chat/
+copilot-chat/
+*.copilot-chat
