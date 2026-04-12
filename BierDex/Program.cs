@@ -9,7 +9,7 @@ builder.Services.AddControllersWithViews();
 //initialization of the database
 builder.Services.AddDbContext<BierdexDBContext>(options =>
     options.UseNpgsql(
-        builder.Configuration.GetConnectionString("DefaultConnection")));
+        builder.Configuration.GetConnectionString("supabase")));
 
 var app = builder.Build();
 
