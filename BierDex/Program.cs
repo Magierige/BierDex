@@ -9,6 +9,8 @@ builder.Services.AddDbContext<BierdexDBContext>(options =>
     options.UseNpgsql(
         builder.Configuration.GetConnectionString("supabase")));
 
+builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true).AddEntityFrameworkStores<BierdexDBContext>();
+
 //builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true).AddEntityFrameworkStores<BierdexDBContext>();
 
 // Add services to the container.
