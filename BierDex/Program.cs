@@ -9,10 +9,6 @@ builder.Services.AddDbContext<BierdexDBContext>(options =>
     options.UseNpgsql(
         builder.Configuration.GetConnectionString("supabase")));
 
-builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true).AddEntityFrameworkStores<BierdexDBContext>();
-
-//builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true).AddEntityFrameworkStores<BierdexDBContext>();
-
 // Add services to the container.
 builder.Services.AddIdentity<IdentityUser, IdentityRole>(options =>
 {
@@ -40,6 +36,7 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
+//seeders
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
