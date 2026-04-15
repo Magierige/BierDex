@@ -5,76 +5,50 @@
     ViewData["Title"] = "Log in";
 }
 
-<h1>@ViewData["Title"]</h1>
-<div class="row">
-    <div class="col-md-4">
-        <section>
-            <form id="account" method="post">
-                <h2>Use a local account to log in.</h2>
-                <hr />
-                <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
-                <div class="form-floating mb-3">
-                    <input asp-for="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="name@example.com" />
-                    <label asp-for="Input.Email" class="form-label">Email</label>
-                    <span asp-validation-for="Input.Email" class="text-danger"></span>
-                </div>
-                <div class="form-floating mb-3">
-                    <input asp-for="Input.Password" class="form-control" autocomplete="current-password" aria-required="true" placeholder="password" />
-                    <label asp-for="Input.Password" class="form-label">Password</label>
-                    <span asp-validation-for="Input.Password" class="text-danger"></span>
-                </div>
-                <div class="checkbox mb-3">
-                    <label asp-for="Input.RememberMe" class="form-label">
-                        <input class="form-check-input" asp-for="Input.RememberMe" />
-                        @Html.DisplayNameFor(m => m.Input.RememberMe)
-                    </label>
-                </div>
-                <div>
-                    <button id="login-submit" type="submit" class="w-100 btn btn-lg btn-primary">Log in</button>
-                </div>
-                <div>
-                    <p>
-                        <a id="forgot-password" asp-page="./ForgotPassword">Forgot your password?</a>
-                    </p>
-                    <p>
-                        <a asp-page="./Register" asp-route-returnUrl="@Model.ReturnUrl">Register as a new user</a>
-                    </p>
-                    <p>
-                        <a id="resend-confirmation" asp-page="./ResendEmailConfirmation">Resend email confirmation</a>
-                    </p>
-                </div>
-            </form>
-        </section>
+<div class="max-w-md mx-auto py-4">
+    <div class="text-center mb-10">
+        <h1 class="text-3xl font-black tracking-tight text-gray-900 uppercase">Welkom terug</h1>
+        <p class="text-gray-500 mt-2">Log in op je BierDex account</p>
+        <div class="w-16 h-1 bg-[linear-gradient(135deg,#F2A900,#D18F00)] mx-auto mt-4 rounded-full"></div>
     </div>
-    <div class="col-md-6 col-md-offset-2">
-        <section>
-            <h3>Use another service to log in.</h3>
-            <hr />
-            @{
-                if ((Model.ExternalLogins?.Count ?? 0) == 0)
-                {
-                    <div>
-                        <p>
-                            There are no external authentication services configured. See this <a href="https://go.microsoft.com/fwlink/?LinkID=532715">article
-                            about setting up this ASP.NET application to support logging in via external services</a>.
-                        </p>
-                    </div>
-                }
-                else
-                {
-                    <form id="external-account" asp-page="./ExternalLogin" asp-route-returnUrl="@Model.ReturnUrl" method="post" class="form-horizontal">
-                        <div>
-                            <p>
-                                @foreach (var provider in Model.ExternalLogins!)
-                                {
-                                    <button type="submit" class="btn btn-primary" name="provider" value="@provider.Name" title="Log in using your @provider.DisplayName account">@provider.DisplayName</button>
-                                }
-                            </p>
-                        </div>
-                    </form>
-                }
-            }
-        </section>
+
+    <form id="account" method="post" class="space-y-6">
+        <div asp-validation-summary="ModelOnly" class="text-red-500 text-sm font-medium bg-red-50 p-3 rounded-lg" role="alert"></div>
+        
+        <div>
+            <label asp-for="Input.Email" class="block text-xs font-black text-gray-400 mb-1 uppercase tracking-widest ml-1">Emailadres</label>
+            <input asp-for="Input.Email" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-amber-500 focus:ring-4 focus:ring-amber-500/10 outline-none transition-all bg-gray-50/50" autocomplete="username" placeholder="naam@voorbeeld.nl" />
+            <span asp-validation-for="Input.Email" class="text-red-500 text-xs mt-1 block ml-1"></span>
+        </div>
+
+        <div>
+            <div class="flex justify-between items-end mb-1 ml-1">
+                <label asp-for="Input.Password" class="block text-xs font-black text-gray-400 uppercase tracking-widest">Wachtwoord</label>
+                <a id="forgot-password" asp-page="./ForgotPassword" class="text-xs font-bold text-amber-600 hover:text-amber-700">Wachtwoord vergeten?</a>
+            </div>
+            <input asp-for="Input.Password" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-amber-500 focus:ring-4 focus:ring-amber-500/10 outline-none transition-all bg-gray-50/50" autocomplete="current-password" placeholder="••••••••" />
+            <span asp-validation-for="Input.Password" class="text-red-500 text-xs mt-1 block ml-1"></span>
+        </div>
+
+        <div class="flex items-center">
+            <label asp-for="Input.RememberMe" class="flex items-center cursor-pointer group">
+                <input class="w-5 h-5 rounded border-gray-300 text-amber-600 focus:ring-amber-500 transition-all cursor-pointer" asp-for="Input.RememberMe" />
+                <span class="ml-3 text-sm font-medium text-gray-600 group-hover:text-gray-900 transition-colors">Blijf ingelogd</span>
+            </label>
+        </div>
+
+        <button id="login-submit" type="submit" class="w-full py-4 rounded-xl bg-[linear-gradient(135deg,#F2A900,#D18F00)] text-white font-black text-lg shadow-xl shadow-amber-200/50 hover:scale-[1.02] active:scale-95 transition-all">
+            INLOGGEN
+        </button>
+    </form>
+
+    <div class="mt-10 pt-6 border-t border-gray-100 text-center">
+        <p class="text-gray-500">
+            Nog geen lid van de club?
+            <a asp-page="./Register" asp-route-returnUrl="@Model.ReturnUrl" class="font-black text-amber-600 hover:text-amber-700 underline decoration-2 underline-offset-4">
+                Maak een account aan
+            </a>
+        </p>
     </div>
 </div>
 

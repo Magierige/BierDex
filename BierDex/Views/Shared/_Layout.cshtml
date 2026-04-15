@@ -4,69 +4,76 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - BierDex</title>
-    <script type="importmap"></script>
     <script src="https://cdn.jsdelivr.net/npm/@@tailwindcss/browser@@4"></script>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/BierDex.styles.css" asp-append-version="true" />
 </head>
-<body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">BierDex</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
-                    </ul>
-                </div>
-                <div id="auth-section" class="">
-                    <ul class="navbar-nav flex-grow-1">
-                        @if (User.Identity != null && User.Identity.IsAuthenticated)
-                            {
-                                <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Manage/Index">Hello, @User.Identity.Name!</a>
-                                </li>
-                                <li class="nav-item">
-                                    <form id="logout-form" method="post" asp-area="Identity" asp-page="/Account/Logout">
-                                        <button type="submit" class="nav-link btn btn-link text-dark">Logout</button>
-                                    </form>
-                                </li>
-                            }
-                            else
-                            {
-                                <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Login">Login</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Register">Register</a>
-                                </li>
-                            }
-                        </ul>
-                </div>
+<body class="bg-gray-50 font-sans text-gray-900 flex flex-col min-h-screen">
+    <header class="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-200">
+        <nav class="container mx-auto px-4 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-8">
+                <a class="text-2xl font-black tracking-tighter text-transparent bg-clip-text bg-[linear-gradient(135deg,#F2A900,#D18F00)]"
+                       asp-area="" asp-controller="Home" asp-action="Index">
+                    BIERDEX
+                </a>
+                
+                <ul class="hidden md:flex items-center gap-6 text-sm font-medium">
+                    <li>
+                        <a class="hover:text-amber-600 transition-colors" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                    </li>
+                    <li>
+                        <a class="hover:text-amber-600 transition-colors" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                    </li>
+                </ul>
+            </div>
+
+            <div id="auth-section" class="flex items-center gap-4">
+                @if (User.Identity != null && User.Identity.IsAuthenticated)
+                {
+                    <div class="flex items-center gap-4">
+                        <a class="text-sm font-semibold border-b-2 border-amber-400" asp-area="Identity" asp-page="/Account/Manage/Index">
+                            @User.Identity.Name
+                        </a>
+                        <form id="logout-form" method="post" asp-area="Identity" asp-page="/Account/Logout" class="inline">
+                            <button type="submit" class="bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-full text-xs font-bold transition-all">
+                                LOGOUT
+                            </button>
+                        </form>
+                    </div>
+                }
+                else
+                {
+                    <a class="text-sm font-medium hover:text-amber-600" asp-area="Identity" asp-page="/Account/Login">Login</a>
+                    <a class="bg-[linear-gradient(135deg,#F2A900,#D18F00)] text-white px-5 py-2 rounded-full text-sm font-bold shadow-lg shadow-amber-200 hover:scale-105 transition-transform"
+                           asp-area="Identity" asp-page="/Account/Register">
+                        Register
+                    </a>
+                }
             </div>
         </nav>
     </header>
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
+
+    <div class="flex-grow">
+        <main role="main" class="container mx-auto px-4 py-8">
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-10">
+                @RenderBody()
+            </div>
         </main>
     </div>
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2026 - BierDex - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+    <footer class="bg-gray-900 text-gray-400 py-10 mt-12">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row justify-between items-center gap-6">
+                <div>
+                    <span class="text-white font-bold tracking-widest text-lg">BIERDEX</span>
+                    <p class="text-xs mt-1 text-gray-500">Jouw persoonlijke bier encyclopedie.</p>
+                </div>
+                <div class="text-sm">
+                    &copy; 2026 - BierDex - <a class="hover:underline" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy Policy</a>
+                </div>
+            </div>
         </div>
     </footer>
+
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>

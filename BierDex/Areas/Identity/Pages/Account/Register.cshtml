@@ -1,64 +1,51 @@
 ﻿@page
 @model RegisterModel
 @{
-    ViewData["Title"] = "Register";
+    ViewData["Title"] = "Registreren";
 }
 
-<h1>@ViewData["Title"]</h1>
-
-<div class="row">
-    <div class="col-md-4">
-        <form id="registerForm" asp-route-returnUrl="@Model.ReturnUrl" method="post">
-            <h2>Create a new account.</h2>
-            <hr />
-            <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
-            <div class="form-floating mb-3">
-                <input asp-for="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="name@example.com" />
-                <label asp-for="Input.Email">Email</label>
-                <span asp-validation-for="Input.Email" class="text-danger"></span>
-            </div>
-            <div class="form-floating mb-3">
-                <input asp-for="Input.Password" class="form-control" autocomplete="new-password" aria-required="true" placeholder="password" />
-                <label asp-for="Input.Password">Password</label>
-                <span asp-validation-for="Input.Password" class="text-danger"></span>
-            </div>
-            <div class="form-floating mb-3">
-                <input asp-for="Input.ConfirmPassword" class="form-control" autocomplete="new-password" aria-required="true" placeholder="password" />
-                <label asp-for="Input.ConfirmPassword">Confirm Password</label>
-                <span asp-validation-for="Input.ConfirmPassword" class="text-danger"></span>
-            </div>
-            <button id="registerSubmit" type="submit" class="w-100 btn btn-lg btn-primary">Register</button>
-        </form>
+<div class="max-w-md mx-auto py-4">
+    <div class="text-center mb-10">
+        <h1 class="text-3xl font-black tracking-tight text-gray-900 uppercase">Nieuw Account</h1>
+        <p class="text-gray-500 mt-2">Word lid van de BierDex community</p>
+        <div class="w-16 h-1 bg-[linear-gradient(135deg,#F2A900,#D18F00)] mx-auto mt-4 rounded-full"></div>
     </div>
-    <div class="col-md-6 col-md-offset-2">
-        <section>
-            <h3>Use another service to register.</h3>
-            <hr />
-            @{
-                if ((Model.ExternalLogins?.Count ?? 0) == 0)
-                {
-                    <div>
-                        <p>
-                            There are no external authentication services configured. See this <a href="https://go.microsoft.com/fwlink/?LinkID=532715">article
-                            about setting up this ASP.NET application to support logging in via external services</a>.
-                        </p>
-                    </div>
-                }
-                else
-                {
-                    <form id="external-account" asp-page="./ExternalLogin" asp-route-returnUrl="@Model.ReturnUrl" method="post" class="form-horizontal">
-                        <div>
-                            <p>
-                                @foreach (var provider in Model.ExternalLogins!)
-                                {
-                                    <button type="submit" class="btn btn-primary" name="provider" value="@provider.Name" title="Log in using your @provider.DisplayName account">@provider.DisplayName</button>
-                                }
-                            </p>
-                        </div>
-                    </form>
-                }
-            }
-        </section>
+
+    <form id="registerForm" asp-route-returnUrl="@Model.ReturnUrl" method="post" class="space-y-5">
+        <div asp-validation-summary="ModelOnly" class="text-red-500 text-sm font-medium bg-red-50 p-3 rounded-lg" role="alert"></div>
+        
+        <div>
+            <label asp-for="Input.Email" class="block text-xs font-black text-gray-400 mb-1 uppercase tracking-widest ml-1">Emailadres</label>
+            <input asp-for="Input.Email" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-amber-500 focus:ring-4 focus:ring-amber-500/10 outline-none transition-all bg-gray-50/50" autocomplete="username" placeholder="naam@voorbeeld.nl" />
+            <span asp-validation-for="Input.Email" class="text-red-500 text-xs mt-1 block ml-1"></span>
+        </div>
+
+        <div>
+            <label asp-for="Input.Password" class="block text-xs font-black text-gray-400 mb-1 uppercase tracking-widest ml-1">Wachtwoord</label>
+            <input asp-for="Input.Password" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-amber-500 focus:ring-4 focus:ring-amber-500/10 outline-none transition-all bg-gray-50/50" autocomplete="new-password" placeholder="••••••••" />
+            <span asp-validation-for="Input.Password" class="text-red-500 text-xs mt-1 block ml-1"></span>
+        </div>
+
+        <div>
+            <label asp-for="Input.ConfirmPassword" class="block text-xs font-black text-gray-400 mb-1 uppercase tracking-widest ml-1">Bevestig Wachtwoord</label>
+            <input asp-for="Input.ConfirmPassword" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-amber-500 focus:ring-4 focus:ring-amber-500/10 outline-none transition-all bg-gray-50/50" autocomplete="new-password" placeholder="••••••••" />
+            <span asp-validation-for="Input.ConfirmPassword" class="text-red-500 text-xs mt-1 block ml-1"></span>
+        </div>
+
+        <div class="pt-2">
+            <button id="registerSubmit" type="submit" class="w-full py-4 rounded-xl bg-[linear-gradient(135deg,#F2A900,#D18F00)] text-white font-black text-lg shadow-xl shadow-amber-200/50 hover:scale-[1.02] active:scale-95 transition-all">
+                ACCOUNT AANMAKEN
+            </button>
+        </div>
+    </form>
+
+    <div class="mt-10 pt-6 border-t border-gray-100 text-center">
+        <p class="text-gray-500">
+            Heb je al een account?
+            <a asp-page="./Login" asp-route-returnUrl="@Model.ReturnUrl" class="font-black text-amber-600 hover:text-amber-700 underline decoration-2 underline-offset-4">
+                Log hier in
+            </a>
+        </p>
     </div>
 </div>
 

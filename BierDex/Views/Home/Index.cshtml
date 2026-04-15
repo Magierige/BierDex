@@ -1,8 +1,62 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Beer Collection";
+    
+    // Mock data for the loop
+    var beers = new[] {
+        new { Name = "Golden Lager", Style = "Lager", Abv = "5.2%", Rating = 4.5, Color = "bg-amber-400" },
+        new { Name = "Hoppy Dreams", Style = "IPA", Abv = "6.8%", Rating = 4.8, Color = "bg-orange-500" },
+        new { Name = "Midnight Stout", Style = "Stout", Abv = "7.5%", Rating = 4.2, Color = "bg-gray-900" },
+        new { Name = "Wheat Heaven", Style = "Witbier", Abv = "4.9%", Rating = 4.0, Color = "bg-yellow-200" },
+        new { Name = "Ruby Red", Style = "Amber Ale", Abv = "5.5%", Rating = 4.3, Color = "bg-red-700" },
+        new { Name = "Crisp Pils", Style = "Pilsner", Abv = "4.7%", Rating = 3.9, Color = "bg-yellow-400" }
+    };
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+<section class="space-y-8">
+    <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <div>
+            <h1 class="text-4xl font-black tracking-tight text-gray-900">Alle biertjes</h1>
+            <p class="text-gray-500 mt-2">Van frisse IPA’s tot zware stouts — vind jouw volgende favoriet.</p>
+        </div>
+    </div>
+
+    <hr class="border-gray-100" />
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        @foreach (var beer in beers)
+        {
+            <div class="group relative bg-white border border-gray-100 rounded-2xl p-5 hover:shadow-xl hover:border-amber-200 transition-all duration-300">
+                <div class="flex items-start justify-between">
+                    <div class="w-14 h-14 rounded-xl @beer.Color shadow-inner flex items-center justify-center text-2xl">
+                        🍺
+                    </div>
+                    <span class="bg-amber-50 text-amber-700 text-xs font-bold px-2.5 py-1 rounded-full border border-amber-100">
+                        ★ @beer.Rating
+                    </span>
+                </div>
+
+                <div class="mt-4">
+                    <h3 class="text-xl font-bold text-gray-900 group-hover:text-amber-600 transition-colors">
+                        @beer.Name
+                    </h3>
+                    <p class="text-sm font-medium text-gray-400 uppercase tracking-wider">
+                        @beer.Style
+                    </p>
+                </div>
+
+                <div class="mt-6 flex items-center justify-between">
+                    <div class="flex flex-col">
+                        <span class="text-xs text-gray-400 font-semibold uppercase">ABV</span>
+                        <span class="text-lg font-bold text-gray-700">@beer.Abv</span>
+                    </div>
+                    
+                    <a href="#" class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-gray-50 text-gray-400 hover:bg-amber-500 hover:text-white transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                        </svg>
+                    </a>
+                </div>
+            </div>
+        }
+    </div>
+</section>
