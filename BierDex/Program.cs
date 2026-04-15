@@ -1,13 +1,15 @@
 using BierDex.Data;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
+using BierDex.Controllers;
 
 var builder = WebApplication.CreateBuilder(args);
 
 //initialization of the database
 builder.Services.AddDbContext<BierdexDBContext>(options =>
     options.UseNpgsql(
-        builder.Configuration.GetConnectionString("supabase")));
+        builder.Configuration.GetConnectionString("localhost")));
 
 // Add services to the container.
 builder.Services.AddIdentity<IdentityUser, IdentityRole>(options =>
@@ -16,6 +18,8 @@ builder.Services.AddIdentity<IdentityUser, IdentityRole>(options =>
 })
 .AddEntityFrameworkStores<BierdexDBContext>()
 .AddDefaultTokenProviders();
+
+builder.Services.AddSingleton<IEmailSender, SmtpControler>();
 
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
