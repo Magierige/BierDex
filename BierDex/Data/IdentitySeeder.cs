@@ -20,13 +20,14 @@ namespace BierDex.Data
             }
 
             // 2. Create users
-            await CreateUser(userManager, "admin@test.com", "Password123!", "Admin");
-            await CreateUser(userManager, "supplier@test.com", "Password123!", "Supplier");
-            await CreateUser(userManager, "user@test.com", "Password123!", "User");
+            await CreateUser(userManager, "admin", "admin@test.com", "Password123!", "Admin");
+            await CreateUser(userManager, "supplier", "supplier@test.com", "Password123!", "Supplier");
+            await CreateUser(userManager, "user", "user@test.com", "Password123!", "User");
         }
 
         private static async Task CreateUser(
             UserManager<IdentityUser> userManager,
+            string username,
             string email,
             string password,
             string role)
@@ -37,7 +38,7 @@ namespace BierDex.Data
             {
                 user = new IdentityUser
                 {
-                    UserName = email,
+                    UserName = username,
                     Email = email,
                     EmailConfirmed = true
                 };

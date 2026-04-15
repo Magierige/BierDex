@@ -15,6 +15,7 @@ builder.Services.AddDbContext<BierdexDBContext>(options =>
 builder.Services.AddIdentity<IdentityUser, IdentityRole>(options =>
 {
     options.SignIn.RequireConfirmedAccount = false;
+    options.User.RequireUniqueEmail = true;
 })
 .AddEntityFrameworkStores<BierdexDBContext>()
 .AddDefaultTokenProviders();
