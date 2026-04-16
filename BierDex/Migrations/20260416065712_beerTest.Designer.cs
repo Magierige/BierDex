@@ -3,6 +3,7 @@ using System;
 using BierDex.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace BierDex.Migrations
 {
     [DbContext(typeof(BierdexDBContext))]
-    partial class BierdexDBContextModelSnapshot : ModelSnapshot
+    [Migration("20260416065712_beerTest")]
+    partial class beerTest
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -29,10 +32,6 @@ namespace BierDex.Migrations
                         .HasColumnType("integer");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("abv")
-                        .IsRequired()
-                        .HasColumnType("text");
 
                     b.Property<int>("barcode")
                         .HasColumnType("integer");

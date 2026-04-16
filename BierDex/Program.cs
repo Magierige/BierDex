@@ -48,8 +48,10 @@ using (var scope = app.Services.CreateScope())
 
     var userManager = services.GetRequiredService<UserManager<IdentityUser>>();
     var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+    var context = services.GetRequiredService<BierdexDBContext>();
 
     await IdentitySeeder.SeedAsync(userManager, roleManager);
+    await BeerSeeder.SeedAsync(context, userManager);
 }
 
 app.MapRazorPages();

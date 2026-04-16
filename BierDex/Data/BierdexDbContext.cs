@@ -10,6 +10,10 @@ namespace BierDex.Data
             : base(options)
         {
         }
+
+        public DbSet<Beer> Beers { get; set; }
+
+       
     }
 }
 
