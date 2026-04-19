@@ -1,8 +1,159 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+﻿@model IEnumerable<BierDex.ViewModels.HomeViewModel>
+@{
+    ViewData["Title"] = "Beer Collection";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+<section class="space-y-8">
+    <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <div>
+            <h1 class="text-4xl font-black tracking-tight text-gray-900 uppercase">Alle biertjes</h1>
+            <p class="text-gray-500 mt-2 italic">Van frisse IPA’s tot zware stouts — vind jouw volgende favoriet.</p>
+        </div>
+        <button onclick="openModal()"
+                class="flex items-center gap-2 px-6 py-3 bg-[linear-gradient(135deg,#F2A900,#D18F00)] text-white rounded-xl font-black shadow-lg shadow-amber-200 hover:scale-105 transition-all uppercase text-sm">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            Zoek op Barcode
+        </button>
+    </div>
+
+    <div id="searchModal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-gray-900/60 backdrop-blur-sm" onclick="closeModal()"></div>
+        
+        <div class="relative bg-white rounded-3xl w-full max-w-md shadow-2xl overflow-hidden transform transition-all">
+            <div class="p-8">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-black text-gray-900 uppercase tracking-tight">Bier Zoeken</h2>
+                    <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-black text-gray-400 mb-1 uppercase tracking-widest ml-1">Scan of typ barcode</label>
+                        <input id="barcodeInput"
+                               type="number"
+                               placeholder="Bijv. 871234567890"
+                               class="w-full px-4 py-4 rounded-xl border border-gray-200 focus:border-amber-500 focus:ring-4 focus:ring-amber-500/10 outline-none transition-all bg-gray-50/50 text-lg font-bold" />
+                    </div>
+
+                    <button onclick="searchBeer()"
+                            class="w-full py-4 rounded-xl bg-gray-900 text-white font-black text-lg hover:bg-gray-800 transition-all shadow-xl">
+                        ZOEKEN
+                    </button>
+                </div>
+
+                <div id="result" class="mt-8 pt-8 border-t border-gray-100 hidden animate-in fade-in slide-in-from-bottom-4 duration-300">
+                    <div class="flex gap-6 items-center bg-gray-50 p-4 rounded-2xl">
+                        <div class="w-24 h-32 flex-shrink-0 bg-white rounded-xl overflow-hidden shadow-sm">
+                            <img id="resultImg" class="w-full h-full object-contain p-2" src="" />
+                        </div>
+                        <div class="flex-grow">
+                            <p id="resultType" class="text-[10px] font-black text-amber-600 uppercase tracking-widest"></p>
+                            <h3 id="resultName" class="text-xl font-black text-gray-900 leading-tight mb-2"></h3>
+                            <a id="resultLink" href="#" class="inline-block text-xs font-bold text-gray-400 hover:text-amber-600 underline">Bekijk details</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <hr class="border-gray-100" />
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+        @foreach (var beer in Model)
+        {
+            <div class="group relative bg-white border border-gray-100 rounded-3xl p-4 hover:shadow-2xl hover:border-amber-200 transition-all duration-500 flex flex-col h-full">
+                
+                <div class="relative aspect-[4/5] w-full mb-6 overflow-hidden rounded-2xl bg-gray-50 flex items-center justify-center">
+                    <div class="absolute inset-0 bg-[radial-gradient(circle,rgba(242,169,0,0.1)_0%,transparent_70%)] opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                    
+                    <img src="images/Despo.png"
+                         alt="@beer.Name"
+                         class="w-full h-full object-contain p-4 transform group-hover:scale-110 transition-transform duration-500 ease-out" />
+                    
+                    <div class="absolute top-3 right-3">
+                        <span class="backdrop-blur-md bg-white/80 text-amber-700 text-[10px] font-black px-2 py-1 rounded-lg border border-white shadow-sm flex items-center gap-1">
+                            ★ 4.9
+                        </span>
+                    </div>
+                </div>
+
+                <div class="flex flex-col flex-grow px-2">
+                    <div class="mb-auto">
+                        <p class="text-[10px] font-black text-amber-600 uppercase tracking-[0.2em] mb-1">
+                            @beer.Type
+                        </p>
+                        <h3 class="text-lg font-black text-gray-900 group-hover:text-amber-600 transition-colors leading-tight">
+                            @beer.Name
+                        </h3>
+                    </div>
+
+                    <div class="mt-6 pt-4 border-t border-gray-50 flex items-center justify-between">
+                        <div class="flex flex-col">
+                            <span class="text-[9px] text-gray-400 font-black uppercase tracking-widest">Alcohol</span>
+                            <span class="text-md font-bold text-gray-800">@beer.Abv</span>
+                        </div>
+                        
+                        <a href="#" class="h-10 w-10 rounded-xl bg-gray-900 text-white flex items-center justify-center shadow-lg shadow-gray-200 group-hover:bg-[linear-gradient(135deg,#F2A900,#D18F00)] group-hover:shadow-amber-200 transition-all duration-300">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</section>
+
+<script>
+    function openModal() {
+    document.getElementById("searchModal").classList.remove("hidden");
+    document.getElementById("barcodeInput").focus();
+    }
+
+    function closeModal() {
+    document.getElementById("searchModal").classList.add("hidden");
+    document.getElementById("barcodeInput").value = "";
+    document.getElementById("result").classList.add("hidden");
+    }
+
+    async function searchBeer() {
+    const btn = event.target;
+    const barcode = document.getElementById("barcodeInput").value;
+    
+    if(!barcode) return;
+
+    btn.innerText = "ZOEKEN...";
+    btn.disabled = true;
+
+    try {
+    const response = await fetch(`/Home/Search?barcode=${barcode}`);
+
+    if (!response.ok) {
+    alert("Bier niet gevonden in de database.");
+    return;
+    }
+
+    const beer = await response.json();
+
+    document.getElementById("resultImg").src = "images/despo.png";
+    document.getElementById("resultName").innerText = beer.name;
+    document.getElementById("resultType").innerText = beer.type;
+            
+    // Toon het resultaat gedeelte
+    document.getElementById("result").classList.remove("hidden");
+    } catch (err) {
+    console.error("Fout bij zoeken:", err);
+    } finally {
+    btn.innerText = "ZOEKEN";
+    btn.disabled = false;
+    }
+    }
+    </script>
