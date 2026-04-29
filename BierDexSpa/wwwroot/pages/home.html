@@ -1,0 +1,73 @@
+<main class="max-w-7xl mx-auto p-6">
+    <section class="space-y-8">
+        <!-- Header remains the same -->
+        <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+            <div>
+                <h1 class="text-4xl font-black tracking-tight text-gray-900 uppercase">Alle biertjes</h1>
+                <p class="text-gray-500 mt-2 italic">Vind jouw volgende favoriet.</p>
+            </div>
+            <button id="openSearchBtn" class="px-6 py-3 bg-amber-500 text-white rounded-xl font-black uppercase text-sm">
+                Zoek op Barcode
+            </button>
+        </div>
+
+        <!-- This is where the JS will inject the cards -->
+        <div id="beer-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8"></div>
+    </section>
+</main>
+
+<div id="searchModal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4">
+    <div id="modalOverlay" class="absolute inset-0 bg-gray-900/60 backdrop-blur-sm"></div>
+    <div class="relative bg-white rounded-3xl w-full max-w-md shadow-2xl overflow-hidden p-8">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-2xl font-black text-gray-900 uppercase tracking-tight">Bier Zoeken</h2>
+            <button id="closeModalBtn" class="text-gray-400 hover:text-gray-600">✕</button>
+        </div>
+        <div class="space-y-4">
+            <input id="barcodeInput" type="text" placeholder="Typ barcode (bijv. 123)" class="w-full px-4 py-4 rounded-xl border border-gray-200 outline-none bg-gray-50/50 text-lg font-bold" />
+            <button id="searchBtn" class="w-full py-4 rounded-xl bg-gray-900 text-white font-black text-lg hover:bg-gray-800 transition-all">ZOEKEN</button>
+        </div>
+
+        <!-- RESULT SECTION -->
+        <div id="searchResult" class="mt-8 pt-8 border-t border-gray-100 hidden">
+            <div class="flex gap-6 items-center bg-gray-50 p-4 rounded-2xl">
+                <div class="w-24 h-32 flex-shrink-0 bg-white rounded-xl overflow-hidden shadow-sm">
+                    <img id="resultImg" class="w-full h-full object-contain p-2" src="" />
+                </div>
+                <div class="flex-grow">
+                    <p id="resultType" class="text-[10px] font-black text-amber-600 uppercase tracking-widest"></p>
+                    <h3 id="resultName" class="text-xl font-black text-gray-900 leading-tight mb-2"></h3>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- THE TEMPLATE: The 'Blueprint' for one beer card -->
+<template id="beer-card-template">
+    <div class="group relative bg-white border border-gray-100 rounded-3xl p-4 hover:shadow-2xl transition-all flex flex-col h-full">
+        <div class="relative aspect-[4/5] w-full mb-6 overflow-hidden rounded-2xl bg-gray-50 flex items-center justify-center">
+            <img class="beer-img w-full h-full object-contain p-4 transition-transform group-hover:scale-110" src="" alt="" />
+            <div class="absolute top-3 right-3">
+                <span class="backdrop-blur-md bg-white/80 text-amber-700 text-[10px] font-black px-2 py-1 rounded-lg border shadow-sm">
+                    ★ <span class="beer-rating"></span>
+                </span>
+            </div>
+        </div>
+        <div class="flex flex-col flex-grow px-2">
+            <div class="mb-auto">
+                <p class="beer-type text-[10px] font-black text-amber-600 uppercase tracking-[0.2em] mb-1"></p>
+                <h3 class="beer-name text-lg font-black text-gray-900 group-hover:text-amber-600 leading-tight"></h3>
+            </div>
+            <div class="mt-6 pt-4 border-t border-gray-50 flex items-center justify-between">
+                <div class="flex flex-col">
+                    <span class="text-[9px] text-gray-400 font-black uppercase">Alcohol</span>
+                    <span class="beer-abv text-md font-bold text-gray-800"></span>
+                </div>
+                <a href="#" class="h-10 w-10 rounded-xl bg-gray-900 text-white flex items-center justify-center group-hover:bg-amber-500 transition-all">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"/></svg>
+                </a>
+            </div>
+        </div>
+    </div>
+</template>
