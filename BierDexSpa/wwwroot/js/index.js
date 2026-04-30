@@ -1,4 +1,5 @@
 ﻿import Home from './views/home.js';
+import Login from './views/login.js';
 
 const navigateTo = url => {
     history.pushState(null, null, url); // place each route in the history list
@@ -27,7 +28,8 @@ function matchRoute(route, pathname) {
 
 const routes = [
     { path: "/", view: Home },
-    { path: "/home", view: Home }
+    { path: "/home", view: Home },
+    { path: "/login", view: Login }
 ];
 
 const router = async () => {
