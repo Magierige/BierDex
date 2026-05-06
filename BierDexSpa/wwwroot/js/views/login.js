@@ -30,7 +30,7 @@ export default class extends AbstractView {
                 await login(email, password);
 
                 window.dispatchEvent(
-                    new CustomEvent("spa-navigation", { detail: "/glasses" }) // Navigate to glasses page after successfull authentication
+                    new CustomEvent("spa-navigation", { detail: "/home" }) // Navigate to home page after successful authentication
                 );
             } catch (err) {
                 if (errorEl) {

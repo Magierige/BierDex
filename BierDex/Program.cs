@@ -15,7 +15,10 @@ builder.Services.AddAuthorization();
 
 // Add services to the container.
 builder.Services
-    .AddIdentityApiEndpoints<IdentityUser>()
+    .AddIdentityApiEndpoints<IdentityUser>(options => 
+    {
+        options.User.RequireUniqueEmail = true;
+    })
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<BierdexDBContext>();
 

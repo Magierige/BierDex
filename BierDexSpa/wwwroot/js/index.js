@@ -26,6 +26,19 @@ function matchRoute(route, pathname) {
     return params; // success! return object met param values
 }
 
+async function getGuestNav() {
+    const response = await fetch("/navGuest.html");
+    const html = await response.text();
+    return html;
+}
+
+async function loadNavBar() {
+    console.log("loading nav...")
+    const nav = document.getElementById("main-nav");
+    if (!nav) return;
+    nav.innerHTML = await getGuestNav();
+}
+
 const routes = [
     { path: "/", view: Home },
     { path: "/home", view: Home },
@@ -73,6 +86,7 @@ const router = async () => {
 };
 
 document.addEventListener("DOMContentLoaded", () => {
+    loadNavBar();
     // listen to clicks in the body
     document.body.addEventListener("click", e => {
         // const link = e.target.closest("[data-link]"); will not work in web component!
