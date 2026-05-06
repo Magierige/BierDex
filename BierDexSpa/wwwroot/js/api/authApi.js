@@ -1,5 +1,5 @@
 ﻿export async function login(email, password) {
-    const response = await fetch("/api/auth/login?useCookies=true&useSessionCookies=true", {
+    const response = await fetch("/api/auth/email-login?useCookies=true&useSessionCookies=true", {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
