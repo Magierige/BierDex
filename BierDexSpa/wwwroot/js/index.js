@@ -1,5 +1,9 @@
 ﻿import Home from './views/home.js';
 import Login from './views/login.js';
+import Register from './views/register.js';
+
+import { isAuthenticated } from "./api/authApi.js";
+import { loadNavBar } from "./nav.js";
 
 const navigateTo = url => {
     history.pushState(null, null, url); // place each route in the history list
@@ -26,23 +30,11 @@ function matchRoute(route, pathname) {
     return params; // success! return object met param values
 }
 
-async function getGuestNav() {
-    const response = await fetch("/navGuest.html");
-    const html = await response.text();
-    return html;
-}
-
-async function loadNavBar() {
-    console.log("loading nav...")
-    const nav = document.getElementById("main-nav");
-    if (!nav) return;
-    nav.innerHTML = await getGuestNav();
-}
-
 const routes = [
     { path: "/", view: Home },
     { path: "/home", view: Home },
-    { path: "/login", view: Login }
+    { path: "/login", view: Login },
+    { path: "/register", view: Register }
 ];
 
 const router = async () => {

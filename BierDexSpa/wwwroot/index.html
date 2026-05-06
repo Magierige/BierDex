@@ -12,11 +12,24 @@
     <script type="module" src="/js/index.js"></script>
     <script>window.apiBaseUrl = "/api/";</script>
 </head>
-<body>
+<body class="pb-40">
     <header class="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-200">
         <nav id="main-nav" class="container mx-auto px-4 h-16 flex items-center justify-between">
         </nav>
     </header>
     <div id="app"></div>
+    <footer class="fixed bottom-0 left-0 w-full bg-gray-900 text-gray-400 py-10">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row justify-between items-center gap-6">
+                <div>
+                    <span class="text-white font-bold tracking-widest text-lg">BIERDEX</span>
+                    <p class="text-xs mt-1 text-gray-500">Jouw persoonlijke bier encyclopedie.</p>
+                </div>
+                <div class="text-sm">
+                    &copy; 2026 - BierDex - <a class="hover:underline">Privacy Policy</a>
+                </div>
+            </div>
+        </div>
+    </footer>
 </body>
 </html>
