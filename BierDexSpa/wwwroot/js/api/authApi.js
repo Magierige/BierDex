@@ -131,3 +131,25 @@ export async function resetPassword(email, token, newPassword) {
         throw new Error(message);
     }
 }
+
+export async function changeUsername(newUsername) {
+    const response = await fetch("/api/auth/change-username", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ newUsername })
+    });
+
+    if (!response.ok) {
+        let message = "Gebruikersnaam wijzigen mislukt.";
+        try {
+            const problem = await response.json();
+            if (problem && problem.title) {
+                message = problem.title;
+            }
+        } catch {
+        }
+        throw new Error(message);
+    }
+}

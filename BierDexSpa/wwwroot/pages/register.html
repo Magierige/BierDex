@@ -18,18 +18,11 @@
             </div>
 
             <div>
+                <label for="password" class="block text-xs font-black text-gray-400 mb-1 uppercase tracking-widest ml-1">Wachtwoord</label>
                 <input type="password" id="password" name="password" required
                        class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-amber-500 focus:ring-4 focus:ring-amber-500/10 outline-none transition-all bg-gray-50/50"
                        autocomplete="current-password" placeholder="••••••••" />
                 <span id="passwordError" class="text-red-500 text-xs mt-1 block ml-1"></span>
-            </div>
-
-            <div class="flex items-center">
-                <label class="flex items-center cursor-pointer group">
-                    <input type="checkbox" id="rememberMe" name="rememberMe"
-                           class="w-5 h-5 rounded border-gray-300 text-amber-600 focus:ring-amber-500 transition-all cursor-pointer" />
-                    <span class="ml-3 text-sm font-medium text-gray-600 group-hover:text-gray-900 transition-colors">Blijf ingelogd</span>
-                </label>
             </div>
 
             <button type="submit" class="w-full py-4 rounded-xl bg-[linear-gradient(135deg,#F2A900,#D18F00)] text-white font-black text-lg shadow-xl shadow-amber-200/50 hover:scale-[1.02] active:scale-95 transition-all">
@@ -40,9 +33,9 @@
 
         <div class="mt-10 pt-6 border-t border-gray-100 text-center">
             <p class="text-gray-500">
-                Nog geen lid van de club?
-                <a href="/register" class="font-black text-amber-600 hover:text-amber-700 underline decoration-2 underline-offset-4">
-                    Maak een account aan
+                Heb je al een account?
+                <a href="/login" class="font-black text-amber-600 hover:text-amber-700 underline decoration-2 underline-offset-4">
+                    Log in
                 </a>
             </p>
         </div>

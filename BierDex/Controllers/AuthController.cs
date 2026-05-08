@@ -7,6 +7,7 @@ namespace API.Controllers
 {
     // Deze regel zorgt ervoor dat 'model.Email', 'model.Password' en 'model.RememberMe' werken
     public record EmailLoginRequest(string Email, string Password, bool RememberMe = false);
+    public record ChangeUsernameRequest(string NewUsername);
 
     [ApiController]
     [Route("api/auth")]
@@ -63,13 +64,13 @@ namespace API.Controllers
             if (model == null || string.IsNullOrEmpty(model.Email))
                 return BadRequest("Email en wachtwoord zijn verplicht.");
 
-            // 1. Zoek de gebruiker op basis van email
+            // Zoek de gebruiker op basis van email
             var user = await _userManager.FindByEmailAsync(model.Email);
 
             if (user == null)
                 return Unauthorized("Ongeldige inloggegevens.");
 
-            // 2. Gebruik de SignInManager om in te loggen met de gevonden Username
+            // Gebruik de SignInManager om in te loggen met de gevonden Username
             // We gebruiken user.UserName omdat Identity intern matcht op de UserName kolom
             var result = await _signInManager.PasswordSignInAsync(
                 user.UserName!,
@@ -86,6 +87,34 @@ namespace API.Controllers
                 return StatusCode(403, "Account is tijdelijk geblokkeerd.");
 
             return Unauthorized("Ongeldige inloggegevens.");
+        }
+
+        [Authorize]
+        [HttpPost("change-username")]
+        public async Task<IActionResult> ChangeUsername([FromBody] ChangeUsernameRequest model)
+        {
+            if (string.IsNullOrWhiteSpace(model.NewUsername))
+                return BadRequest("Nieuwe gebruikersnaam is verplicht.");
+
+            // Haal de huidige ingelogde gebruiker op
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+                return Unauthorized();
+
+            // Update de gebruikersnaam
+            var result = await _userManager.SetUserNameAsync(user, model.NewUsername);
+
+            if (result.Succeeded)
+            {
+                // Update de beveiligingsstempel en ververs de login-cookie 
+                // zodat de nieuwe naam direct in User.Identity.Name staat.
+                await _signInManager.RefreshSignInAsync(user);
+
+                return Ok(new { message = "Gebruikersnaam succesvol gewijzigd!", newUsername = user.UserName });
+            }
+
+            // Foutafhandeling (bijv. validatieregels van Identity)
+            return BadRequest(result.Errors);
         }
     }
 }
