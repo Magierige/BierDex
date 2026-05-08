@@ -1,4 +1,6 @@
 ﻿import AbstractView from "../abstractView.js";
+import { getAllBeers } from "../api/beerApi.js";
+import { getRandomBeerRating } from "../api/beerApi.js";
 
 export default class extends AbstractView {
     constructor() {
@@ -32,11 +34,13 @@ export default class extends AbstractView {
     }
 
     async init() {
+        this.beerData = await getAllBeers();
         this.renderBeers();
         this.setupEventListeners();
     }
 
     renderBeers() {
+        
         const grid = document.getElementById('beer-grid');
         const template = document.getElementById('beer-card-template');
         if (!grid || !template) return;
@@ -47,8 +51,8 @@ export default class extends AbstractView {
             clone.querySelector('.beer-name').textContent = beer.name;
             clone.querySelector('.beer-type').textContent = beer.type;
             clone.querySelector('.beer-abv').textContent = beer.abv;
-            clone.querySelector('.beer-rating').textContent = beer.rating;
-            clone.querySelector('.beer-img').src = beer.img;
+            clone.querySelector('.beer-rating').textContent = getRandomBeerRating();
+            clone.querySelector('.beer-img').src = beer.imagePath;
             grid.appendChild(clone);
         });
     }
@@ -91,10 +95,10 @@ export default class extends AbstractView {
         const query = document.getElementById("barcodeInput").value.trim();
         const resultDiv = document.getElementById("searchResult");
 
-        const foundBeer = this.beerData.find(b => b.barcode === query);
+        const foundBeer = this.beerData.find(b => b.barcode == query);
 
         if (foundBeer) {
-            document.getElementById("resultImg").src = foundBeer.img;
+            document.getElementById("resultImg").src = foundBeer.imagePath;
             document.getElementById("resultName").innerText = foundBeer.name;
             document.getElementById("resultType").innerText = foundBeer.type;
             resultDiv.classList.remove("hidden");
