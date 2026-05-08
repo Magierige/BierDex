@@ -14,6 +14,18 @@ export default class extends AbstractView {
     }
 
     async afterRenderer() {
+        const params = new URLSearchParams(window.location.search);
+        if (params.get("resetSent") === "true") {
+            const notifyEl = document.getElementById("success-notification");
+            const messageEl = document.getElementById("success-message");
+
+            if (notifyEl && messageEl) {
+                messageEl.textContent = "Check je inbox! Als het e-mailadres bekend is en geverifieerd, hebben we een herstelmail gestuurd.";
+                notifyEl.classList.remove("hidden");
+                window.history.replaceState({}, document.title, "/login");
+            }
+        }
+
         const form = document.getElementById("login-form");
         const errorEl = document.getElementById("login-error");
 

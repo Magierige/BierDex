@@ -15,7 +15,6 @@ async function getNav() {
 }
 
 export async function loadNavBar() {
-    console.log("loading nav...")
     const nav = document.getElementById("main-nav");
     if (!nav) return;
     if (await isAuthenticated()) {
@@ -46,7 +45,6 @@ export async function loadNavBar() {
 }
 
 window.addEventListener("auth-changed", (event) => {
-    console.log("Auth status veranderd naar:", event.detail.isAuthenticated);
     loadNavBar(); // Herlaad de balk direct als de status verandert
 });
 

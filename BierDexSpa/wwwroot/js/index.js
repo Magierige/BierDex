@@ -1,6 +1,8 @@
 ﻿import Home from './views/home.js';
 import Login from './views/login.js';
 import Register from './views/register.js';
+import forgotPassword from './views/forgotPassword.js';
+import ResetPassword from './views/resetPassword.js';
 
 import { isAuthenticated } from "./api/authApi.js";
 import { loadNavBar } from "./nav.js";
@@ -34,7 +36,9 @@ const routes = [
     { path: "/", view: Home },
     { path: "/home", view: Home },
     { path: "/login", view: Login },
-    { path: "/register", view: Register }
+    { path: "/register", view: Register },
+    { path: "/forgot-password", view: forgotPassword },
+    { path: "/reset-password", view: ResetPassword }
 ];
 
 const router = async () => {

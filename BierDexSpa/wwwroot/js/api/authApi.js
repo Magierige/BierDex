@@ -38,12 +38,10 @@ export async function logout() {
 }
 
 export async function isAuthenticated() {
-    console.log("Checking authentication status...");
     const response = await fetch("/api/auth/status", {
         method: "GET",
         credentials: "include"
     });
-    console.log("Authentication status response:", response);
     return response.status === 200;
 }
 
@@ -84,4 +82,52 @@ export async function register(email, password) {
         login(email, password);
     }
 
+}
+
+export async function forgotPassword(email) {
+    const response = await fetch("/api/auth/forgotPassword", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ email })
+    });
+
+    if (!response.ok) {
+        let message = "Wachtwoord vergeten mislukt.";
+        try {
+            const problem = await response.json();
+            if (problem && problem.title) {
+                message = problem.title;
+            }
+        } catch {
+        }
+        throw new Error(message);
+    }
+}
+
+export async function resetPassword(email, token, newPassword) {
+    const response = await fetch("/api/auth/resetPassword", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            email: email,
+            resetCode: token,    
+            newPassword: newPassword
+        })
+    });
+
+    if (!response.ok) {
+        let message = "Wachtwoord resetten mislukt.";
+        try {
+            const problem = await response.json();
+            if (problem && problem.title) {
+                message = problem.title;
+            }
+        } catch {
+        }
+        throw new Error(message);
+    }
 }
