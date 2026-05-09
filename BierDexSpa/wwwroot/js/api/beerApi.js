@@ -4,7 +4,6 @@
         if (!response.ok) throw new Error("Could not fetch beers");
 
         const beers = await response.json();
-        console.log("Beers from DB:", beers);
         return beers;
     } catch (error) {
         console.error("Error:", error);
