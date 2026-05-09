@@ -1,4 +1,4 @@
-﻿import { isAuthenticated, isHigherUser, getUsername, logout } from "./api/authApi.js";
+﻿import { isAuthenticated, isHigherUser, getUsername, logout, isAdmin } from "./api/authApi.js";
 
 async function getGuestNav() {
     const response = await fetch("/navGuest.html");
@@ -36,6 +36,19 @@ export async function loadNavBar() {
                     const li = document.createElement("li");
                     li.id = `${id}-manage-beer`;
                     li.innerHTML = `<a class="hover:text-amber-600 transition-colors" href="/manage-beers">Manage Beers</a>`;
+                    container.appendChild(li);
+                }
+            });
+        }
+        if (await isAdmin()) {
+            const containers = ["nav-links", "nav-links-mobile"];
+
+            containers.forEach(id => {
+                const container = document.getElementById(id);
+                if (container && !document.getElementById(`${id}-create-user`)) {
+                    const li = document.createElement("li");
+                    li.id = `${id}-create-user`;
+                    li.innerHTML = `<a class="hover:text-amber-600 transition-colors" href="/create-user">Create User</a>`;
                     container.appendChild(li);
                 }
             });
