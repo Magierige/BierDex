@@ -10,6 +10,54 @@
     }
 }
 
+export async function getMyBeers() {
+    try {
+        const response = await fetch("/api/beer/my-beers");
+        if (!response.ok) throw new Error("Could not fetch beers");
+
+        const beers = await response.json();
+        return beers;
+    } catch (error) {
+        console.error("Error:", error);
+    }
+}
+
+export async function updateBeer(beer) {
+    try {
+        const response = await fetch(`/api/beer/${beer.id}`, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(beer)
+        });
+
+        if (!response.ok) throw new Error("Could not update beer");
+
+        const updatedBeer = await response.json();
+        return updatedBeer;
+    } catch (error) {
+        console.error("Error:", error);
+    }
+}
+
+export async function deleteBeer(beerId) {
+    try {
+        const response = await fetch(`/api/beer/${beerId}`, {
+            method: "DELETE"
+        });
+
+        if (!response.ok) {
+            const errorData = await response.text();
+            throw new Error(errorData || "Could not delete beer");
+        }
+
+        return true;
+    } catch (error) {
+        console.error("Error:", error);
+    }
+}
+
 export function getRandomBeerRating() {
     // Math.random() * 9 gives 0 to 9.0
     // + 1 shifts the range to 1.0 to 10.0

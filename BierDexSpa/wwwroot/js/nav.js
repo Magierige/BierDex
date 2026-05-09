@@ -1,6 +1,4 @@
-﻿import { isAuthenticated } from "./api/authApi.js";
-import { getUsername } from "./api/authApi.js"; 
-import { logout } from "./api/authApi.js";
+﻿import { isAuthenticated, isHigherUser, getUsername, logout } from "./api/authApi.js";
 
 async function getGuestNav() {
     const response = await fetch("/navGuest.html");
@@ -19,6 +17,20 @@ export async function loadNavBar() {
     if (!nav) return;
     if (await isAuthenticated()) {
         nav.innerHTML = await getNav();
+
+        if (await isHigherUser()) {
+            const navLinks = document.getElementById("nav-links");
+            // Check if the link is already there using an ID
+            if (navLinks && !document.getElementById("manage-beer-nav-link")) {
+                const manageBeerLi = document.createElement("li");
+                manageBeerLi.id = "manage-beer-nav-link"; // Set the ID here
+                manageBeerLi.innerHTML = `
+            <a class="hover:text-amber-600 transition-colors" href="/manage-beers">
+                Manage Beers
+            </a>`;
+                navLinks.appendChild(manageBeerLi);
+            }
+        }
 
         const userLink = document.getElementById("username-link");
         if (userLink) userLink.textContent = await getUsername();
