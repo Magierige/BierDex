@@ -1,13 +1,18 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using BierDex.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.Data;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace API.Controllers
 {
     // Deze regel zorgt ervoor dat 'model.Email', 'model.Password' en 'model.RememberMe' werken
     public record EmailLoginRequest(string Email, string Password, bool RememberMe = false);
     public record ChangeUsernameRequest(string NewUsername);
+    public record UserRegisterDto(string Email, string Username, string Role, string? Password);
 
     [ApiController]
     [Route("api/auth")]
@@ -15,11 +20,13 @@ namespace API.Controllers
     {
         private readonly SignInManager<IdentityUser> _signInManager;
         private readonly UserManager<IdentityUser> _userManager;
+        private readonly IEmailSender _emailSender;
 
-        public AuthController(SignInManager<IdentityUser> signInManager, UserManager<IdentityUser> userManager)
+        public AuthController(SignInManager<IdentityUser> signInManager, UserManager<IdentityUser> userManager, IEmailSender emailSender)
         {
             _signInManager = signInManager;
             _userManager = userManager;
+            _emailSender = emailSender;
         }
 
         [Authorize]
@@ -114,6 +121,48 @@ namespace API.Controllers
             }
 
             // Foutafhandeling (bijv. validatieregels van Identity)
+            return BadRequest(result.Errors);
+        }
+
+        [HttpPost("create-user")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> CreateUser([FromBody] UserRegisterDto model)
+        {
+            if (model == null || string.IsNullOrWhiteSpace(model.Email))
+                return BadRequest("Email is verplicht.");
+
+            var user = new IdentityUser
+            {
+                UserName = string.IsNullOrWhiteSpace(model.Username) ? model.Email : model.Username,
+                Email = model.Email,
+                EmailConfirmed = true // Nodig voor de wachtwoord-reset flow
+            };
+
+            // de gebruiker wordt aangemaakt met een tijdelijk random wachtwoord
+            var tempPassword = Guid.NewGuid().ToString() + "Ab1!";
+            var result = await _userManager.CreateAsync(user, tempPassword);
+
+            if (result.Succeeded)
+            {
+                if (!string.IsNullOrWhiteSpace(model.Role))
+                {
+                    await _userManager.AddToRoleAsync(user, model.Role);
+                }
+
+                // Genereer de ForgotPassword token
+                var code = await _userManager.GeneratePasswordResetTokenAsync(user);
+
+                // Verstuur de mail 
+                await _emailSender.SendEmailAsync(user.Email!, "Reset Password", $"password reset token: {code}");
+
+                return Ok(new
+                {
+                    message = "Gebruiker succesvol aangemaakt en activatiemail verzonden!",
+                    username = user.UserName,
+                    role = model.Role
+                });
+            }
+
             return BadRequest(result.Errors);
         }
     }
