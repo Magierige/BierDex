@@ -5,6 +5,7 @@ import forgotPassword from './views/forgotPassword.js';
 import ResetPassword from './views/resetPassword.js';
 import ManageProfile from './views/manageProfile.js';
 import ManageBeers from './views/manageBeers.js';
+import adminCreateUser from './views/adminCreateUser.js';
 
 import { isAuthenticated, isHigherUser } from "./api/authApi.js";
 import { loadNavBar } from "./nav.js";
@@ -42,7 +43,8 @@ const routes = [
     { path: "/forgot-password", view: forgotPassword },
     { path: "/reset-password", view: ResetPassword },
     { path: "/manage-profile", view: ManageProfile },
-    { path: "/manage-beers", view: ManageBeers, requiresHigherUser: true }
+    { path: "/manage-beers", view: ManageBeers, requiresHigherUser: true },
+    { path: "/create-user", view: adminCreateUser} 
 ];
 
 const router = async () => {
