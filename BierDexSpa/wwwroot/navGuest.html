@@ -1,0 +1,19 @@
+﻿        <div class="flex items-center gap-8">
+            <a class="text-2xl font-black tracking-tighter text-transparent bg-clip-text bg-[linear-gradient(135deg,#F2A900,#D18F00)]"
+               asp-area="" asp-controller="Home" asp-action="Index">
+                BIERDEX
+            </a>
+
+            <ul class="hidden md:flex items-center gap-6 text-sm font-medium">
+                <li>
+                    <a class="hover:text-amber-600 transition-colors" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                </li>
+            </ul>
+        </div>
+
+        <div id="auth-section" class="flex items-center gap-4">
+            <a class="bg-[linear-gradient(135deg,#F2A900,#D18F00)] text-white px-5 py-2 rounded-full text-sm font-bold shadow-lg shadow-amber-200 hover:scale-105 transition-transform" href="/login">Login</a>
+            <a class="bg-[linear-gradient(135deg,#F2A900,#D18F00)] text-white px-5 py-2 rounded-full text-sm font-bold shadow-lg shadow-amber-200 hover:scale-105 transition-transform" href="/register">
+                Register
+            </a>
+        </div>

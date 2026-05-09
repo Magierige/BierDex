@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="BierDex/BierDex.csproj" />
+  <Project Path="BierDexSpa/BierDexSpa.csproj" Id="30e1bb1a-cab1-4b83-8545-34a71c6a6821" />
+</Solution>
