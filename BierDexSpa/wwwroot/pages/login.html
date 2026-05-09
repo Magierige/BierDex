@@ -1,0 +1,53 @@
+﻿<main>
+    <div class="max-w-md mx-auto py-4">
+        <div class="text-center mb-10">
+            <h1 class="text-3xl font-black tracking-tight text-gray-900 uppercase">Welkom terug</h1>
+            <p class="text-gray-500 mt-2">Log in op je BierDex account</p>
+            <div class="w-16 h-1 bg-[linear-gradient(135deg,#F2A900,#D18F00)] mx-auto mt-4 rounded-full"></div>
+        </div>
+
+        <div id="success-notification" class="hidden mb-6 p-4 rounded-xl bg-green-50 border border-green-100 flex items-center gap-3">
+            <div class="flex-shrink-0 w-8 h-8 rounded-full bg-green-500 flex items-center justify-center">
+                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
+                </svg>
+            </div>
+            <p id="success-message" class="text-green-800 text-sm font-bold"></p>
+        </div>
+
+        <form id="login-form" class="space-y-6">
+            <div>
+                <label for="email" class="block text-xs font-black text-gray-400 mb-1 uppercase tracking-widest ml-1">Emailadres</label>
+                <input type="email" id="email" name="email" required
+                       class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-amber-500 focus:ring-4 focus:ring-amber-500/10 outline-none transition-all bg-gray-50/50"
+                       autocomplete="username" placeholder="naam@voorbeeld.nl" />
+                <span id="emailError" class="text-red-500 text-xs mt-1 block ml-1"></span>
+            </div>
+
+            <div>
+                <div class="flex justify-between items-end mb-1 ml-1">
+                    <label for="password" class="block text-xs font-black text-gray-400 uppercase tracking-widest">Wachtwoord</label>
+                    <a href="/forgot-password" class="text-xs font-bold text-amber-600 hover:text-amber-700">Wachtwoord vergeten?</a>
+                </div>
+                <input type="password" id="password" name="password" required
+                       class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-amber-500 focus:ring-4 focus:ring-amber-500/10 outline-none transition-all bg-gray-50/50"
+                       autocomplete="current-password" placeholder="••••••••" />
+                <span id="passwordError" class="text-red-500 text-xs mt-1 block ml-1"></span>
+            </div>
+
+            <button type="submit" class="w-full py-4 rounded-xl bg-[linear-gradient(135deg,#F2A900,#D18F00)] text-white font-black text-lg shadow-xl shadow-amber-200/50 hover:scale-[1.02] active:scale-95 transition-all">
+                INLOGGEN
+            </button>
+            <p id="login-error" class="error-message"></p>
+        </form>
+
+        <div class="mt-10 pt-6 border-t border-gray-100 text-center">
+            <p class="text-gray-500">
+                Nog geen lid van de club?
+                <a href="/register" class="font-black text-amber-600 hover:text-amber-700 underline decoration-2 underline-offset-4">
+                    Maak een account aan
+                </a>
+            </p>
+        </div>
+    </div>
+</main>

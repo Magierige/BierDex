@@ -11,32 +11,53 @@ builder.Services.AddDbContext<BierdexDBContext>(options =>
     options.UseNpgsql(
         builder.Configuration.GetConnectionString("localhost")));
 
+builder.Services.AddAuthorization();
+
 // Add services to the container.
-builder.Services.AddIdentity<IdentityUser, IdentityRole>(options =>
-{
-    options.SignIn.RequireConfirmedAccount = false;
-    options.User.RequireUniqueEmail = true;
-})
-.AddEntityFrameworkStores<BierdexDBContext>()
-.AddDefaultTokenProviders();
+builder.Services
+    .AddIdentityApiEndpoints<IdentityUser>(options => 
+    {
+        options.User.RequireUniqueEmail = true;
+    })
+    .AddRoles<IdentityRole>()
+    .AddEntityFrameworkStores<BierdexDBContext>();
+
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 
 builder.Services.AddSingleton<IEmailSender, SmtpControler>();
 
-builder.Services.AddControllersWithViews();
-builder.Services.AddRazorPages();
+builder.Services.AddControllers();
+
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
 
 var app = builder.Build();
 
+app.UseCors();
+
 // Configure the HTTP request pipeline.
-if (!app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment())
 {
-    app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-    app.UseHsts();
+    app.UseSwagger();
+    app.UseSwaggerUI(options =>
+    {
+        // This makes Swagger UI available at the application root (/)
+        options.RoutePrefix = string.Empty;
+
+        // Ensure the endpoint still points to the correct JSON definition
+        options.SwaggerEndpoint("/swagger/v1/swagger.json", "v1");
+    });
 }
 
 app.UseHttpsRedirection();
-app.UseRouting();
 
 app.UseAuthentication();
 app.UseAuthorization();
@@ -54,14 +75,9 @@ using (var scope = app.Services.CreateScope())
     await BeerSeeder.SeedAsync(context, userManager);
 }
 
-app.MapRazorPages();
+app.MapControllers();
 
-app.MapStaticAssets();
-
-app.MapControllerRoute(
-    name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}")
-    .WithStaticAssets();
-
+var authGroup = app.MapGroup("/api/auth");
+authGroup.MapIdentityApi<IdentityUser>();
 
 app.Run();

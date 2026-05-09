@@ -1,0 +1,18 @@
+var builder = WebApplication.CreateBuilder(args);
+
+builder.Services
+    .AddReverseProxy()
+    .LoadFromConfig(builder.Configuration.GetSection("ReverseProxy"));
+
+var app = builder.Build();
+
+app.UseHttpsRedirection();
+
+app.UseDefaultFiles();
+app.UseStaticFiles();
+
+app.MapReverseProxy();
+
+app.MapFallbackToFile("index.html");
+
+app.Run();
