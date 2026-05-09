@@ -222,3 +222,25 @@ export async function isHigherUser() {
     console.log("laatste stap no supplier or admin")
     return false
 } 
+
+export async function createUser(email, username, role) {
+    const response = await fetch("/api/auth/create-user", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ email, username, role })
+    });
+
+    if (!response.ok) {
+        let message = "Gebruiker aanmaken mislukt.";
+        try {
+            const problem = await response.json();
+            if (problem && problem.title) {
+                message = problem.title;
+            }
+        } catch {
+        }
+        throw new Error(message);
+    }
+}
