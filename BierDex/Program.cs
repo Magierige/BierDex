@@ -20,7 +20,8 @@ builder.Services
         options.User.RequireUniqueEmail = true;
     })
     .AddRoles<IdentityRole>()
-    .AddEntityFrameworkStores<BierdexDBContext>();
+    .AddEntityFrameworkStores<BierdexDBContext>()
+    .AddUserStore<MyUserStore>();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

@@ -99,7 +99,7 @@ namespace API.Controllers
             // Haal de huidige ingelogde gebruiker op
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
-                return Unauthorized();
+                return Unauthorized("");
 
             // Update de gebruikersnaam
             var result = await _userManager.SetUserNameAsync(user, model.NewUsername);
