@@ -1,34 +1,41 @@
 ﻿<header class="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-200 w-full">
-    <nav class="container mx-auto px-4 h-16 flex items-center">
+    <nav class="container mx-auto px-4 h-16 flex items-center justify-between">
 
-        <!-- LOGO (Links) -->
-        <div class="flex-none">
-            <a class="text-2xl font-black tracking-tighter text-transparent bg-clip-text bg-[linear-gradient(135deg,#F2A900,#D18F00)]"
-               href="/">
+        <!-- Left: Logo & Desktop Links -->
+        <div class="flex items-center">
+            <a class="text-2xl font-black tracking-tighter text-transparent bg-clip-text bg-[linear-gradient(135deg,#F2A900,#D18F00)]" href="/">
                 BIERDEX
             </a>
-        </div>
-
-        <!-- NAV LINKS (In het midden, maar vult de ruimte) -->
-        <div class="flex-1 ml-8">
-            <ul id="nav-links" class="hidden md:flex items-center gap-6 text-sm font-medium">
-                <li>
-                    <a class="hover:text-amber-600 transition-colors" href="/home">Home</a>
-                </li>
+            <ul id="nav-links" class="hidden md:flex items-center gap-6 ml-8 text-sm font-medium">
+                <li><a class="hover:text-amber-600 transition-colors" href="/home">Home</a></li>
             </ul>
         </div>
 
-        <!-- AUTH SECTIE (Geforceerd naar rechts met ml-auto) -->
-        <div id="auth-section" class="flex-none flex items-center gap-4 ml-auto">
-            <a id="username-link" class="text-sm font-semibold border-b-2 border-amber-400" href="/manage-profile">
-                username
-            </a>
-            <form id="logout-form" method="post" class="inline">
-                <button type="submit" class="bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-full text-xs font-bold transition-all">
-                    LOGOUT
-                </button>
-            </form>
-        </div>
+        <!-- Right: Auth + Mobile Toggle -->
+        <div class="flex items-center gap-4">
+            <div id="auth-section" class="hidden md:flex items-center gap-4">
+                <a id="username-link" class="text-sm font-semibold border-b-2 border-amber-400" href="/manage-profile">username</a>
+                <form id="logout-form" method="post" class="inline">
+                    <button type="submit" class="bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-full text-xs font-bold transition-all">LOGOUT</button>
+                </form>
+            </div>
 
+            <!-- Hamburger Button (Visible only on mobile) -->
+            <button id="mobile-menu-button" class="md:hidden p-2 text-gray-600 hover:text-amber-600 focus:outline-none">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+            </button>
+        </div>
     </nav>
+
+    <!-- Mobile Menu Overlay (Hidden by default) -->
+    <div id="mobile-menu" class="hidden md:hidden bg-white border-b border-gray-200 px-4 py-4 space-y-4">
+        <ul id="nav-links-mobile" class="flex flex-col gap-4 text-sm font-medium">
+            <li><a class="hover:text-amber-600" href="/home">Home</a></li>
+        </ul>
+        <hr>
+        <div id="auth-section-mobile" class="flex flex-col gap-4">
+            <a id="username-link-mobile" class="text-sm font-semibold" href="/manage-profile">username</a>
+            <button id="logout-btn-mobile" class="bg-gray-100 px-4 py-2 rounded-full text-xs font-bold w-full">LOGOUT</button>
+        </div>
+    </div>
 </header>
