@@ -1,19 +1,47 @@
-﻿        <div class="flex items-center gap-8">
+﻿<header class="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-200 w-full">
+    <nav class="container mx-auto px-4 h-16 flex items-center justify-between">
+
+        <!-- Left: Logo & Desktop Links -->
+        <div class="flex items-center gap-8">
             <a class="text-2xl font-black tracking-tighter text-transparent bg-clip-text bg-[linear-gradient(135deg,#F2A900,#D18F00)]"
-               asp-area="" asp-controller="Home" asp-action="Index">
+               href="/">
                 BIERDEX
             </a>
 
-            <ul class="hidden md:flex items-center gap-6 text-sm font-medium">
+            <!-- Desktop Links (Hidden on mobile) -->
+            <ul id="nav-links" class="hidden md:flex items-center gap-6 text-sm font-medium">
                 <li>
-                    <a class="hover:text-amber-600 transition-colors" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                    <a class="hover:text-amber-600 transition-colors" href="/home">Home</a>
                 </li>
             </ul>
         </div>
 
-        <div id="auth-section" class="flex items-center gap-4">
-            <a class="bg-[linear-gradient(135deg,#F2A900,#D18F00)] text-white px-5 py-2 rounded-full text-sm font-bold shadow-lg shadow-amber-200 hover:scale-105 transition-transform" href="/login">Login</a>
-            <a class="bg-[linear-gradient(135deg,#F2A900,#D18F00)] text-white px-5 py-2 rounded-full text-sm font-bold shadow-lg shadow-amber-200 hover:scale-105 transition-transform" href="/register">
-                Register
-            </a>
+        <!-- Right: Auth + Mobile Toggle -->
+        <div class="flex items-center gap-4">
+            <!-- Desktop Auth (Hidden on mobile) -->
+            <div id="auth-section" class="hidden md:flex items-center gap-4">
+                <a class="bg-[linear-gradient(135deg,#F2A900,#D18F00)] text-white px-5 py-2 rounded-full text-sm font-bold shadow-lg shadow-amber-200 hover:scale-105 transition-transform" href="/login">Login</a>
+                <a class="bg-[linear-gradient(135deg,#F2A900,#D18F00)] text-white px-5 py-2 rounded-full text-sm font-bold shadow-lg shadow-amber-200 hover:scale-105 transition-transform" href="/register">Register</a>
+            </div>
+
+            <!-- Hamburger Button (Visible only on mobile) -->
+            <button id="mobile-menu-button" class="md:hidden p-2 text-gray-600 hover:text-amber-600 focus:outline-none">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path>
+                </svg>
+            </button>
         </div>
+    </nav>
+
+    <!-- Mobile Menu Overlay (Hidden by default) -->
+    <div id="mobile-menu" class="hidden md:hidden bg-white border-b border-gray-200 px-4 py-4 space-y-4">
+        <ul id="nav-links-mobile" class="flex flex-col gap-4 text-sm font-medium">
+            <li><a class="hover:text-amber-600" href="/home">Home</a></li>
+        </ul>
+        <hr>
+        <div id="auth-section-mobile" class="flex flex-col gap-4">
+            <a class="text-center bg-[linear-gradient(135deg,#F2A900,#D18F00)] text-white px-5 py-2 rounded-full text-sm font-bold" href="/login">Login</a>
+            <a class="text-center border border-amber-500 text-amber-600 px-5 py-2 rounded-full text-sm font-bold" href="/register">Register</a>
+        </div>
+    </div>
+</header>

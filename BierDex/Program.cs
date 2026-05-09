@@ -1,8 +1,9 @@
+using BierDex.Controllers;
 using BierDex.Data;
+using BierDex.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
-using BierDex.Controllers;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,7 +21,8 @@ builder.Services
         options.User.RequireUniqueEmail = true;
     })
     .AddRoles<IdentityRole>()
-    .AddEntityFrameworkStores<BierdexDBContext>();
+    .AddEntityFrameworkStores<BierdexDBContext>()
+    .AddUserStore<MyUserStore>();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -38,6 +40,8 @@ builder.Services.AddCors(options =>
               .AllowAnyMethod();
     });
 });
+
+builder.Services.AddScoped<BeerService>();
 
 var app = builder.Build();
 

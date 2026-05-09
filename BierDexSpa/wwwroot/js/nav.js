@@ -1,6 +1,4 @@
-﻿import { isAuthenticated } from "./api/authApi.js";
-import { getUsername } from "./api/authApi.js"; 
-import { logout } from "./api/authApi.js";
+﻿import { isAuthenticated, isHigherUser, getUsername, logout } from "./api/authApi.js";
 
 async function getGuestNav() {
     const response = await fetch("/navGuest.html");
@@ -17,30 +15,64 @@ async function getNav() {
 export async function loadNavBar() {
     const nav = document.getElementById("main-nav");
     if (!nav) return;
+
     if (await isAuthenticated()) {
         nav.innerHTML = await getNav();
 
-        const userLink = document.getElementById("username-link");
-        if (userLink) userLink.textContent = await getUsername();
+        // 1. Setup Mobile Toggle Logic
+        const btn = document.getElementById("mobile-menu-button");
+        const menu = document.getElementById("mobile-menu");
+        if (btn && menu) {
+            btn.onclick = () => menu.classList.toggle("hidden");
+        }
 
-        const logoutForm = document.getElementById("logout-form");
-        if (logoutForm) {
-            logoutForm.addEventListener("submit", async (event) => {
-                event.preventDefault(); // Voorkom dat de pagina echt de form verstuurt
-
-                try {
-                    await logout(); // Roep je API functie aan
-                    // Na succesvol uitloggen, verstuur je het event zodat de nav ververst
-                    window.dispatchEvent(new CustomEvent("auth-changed", {
-                        detail: { isAuthenticated: false }
-                    }));
-                } catch (error) {
-                    console.error("Logout mislukt:", error);
+        // 2. Handle Higher User Links (Desktop AND Mobile)
+        if (await isHigherUser()) {
+            const containers = ["nav-links", "nav-links-mobile"];
+            
+            containers.forEach(id => {
+                const container = document.getElementById(id);
+                if (container && !document.getElementById(`${id}-manage-beer`)) {
+                    const li = document.createElement("li");
+                    li.id = `${id}-manage-beer`;
+                    li.innerHTML = `<a class="hover:text-amber-600 transition-colors" href="/manage-beers">Manage Beers</a>`;
+                    container.appendChild(li);
                 }
             });
         }
+
+        // 3. Update Usernames
+        const username = await getUsername();
+        ["username-link", "username-link-mobile"].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.textContent = username;
+        });
+
+        // 4. Logout Listeners (Standard & Mobile)
+        const handleLogout = async (e) => {
+            e.preventDefault();
+            try {
+                await logout();
+                window.dispatchEvent(new CustomEvent("auth-changed", { detail: { isAuthenticated: false } }));
+            } catch (err) { console.error(err); }
+        };
+
+        document.getElementById("logout-form")?.addEventListener("submit", handleLogout);
+        document.getElementById("logout-btn-mobile")?.addEventListener("click", handleLogout);
+
     } else {
-        nav.innerHTML = await getGuestNav();
+        const guestContent = await getGuestNav();
+        nav.innerHTML = guestContent;
+
+        // Re-attach the toggle logic for the Guest menu
+        const btn = document.getElementById("mobile-menu-button");
+        const menu = document.getElementById("mobile-menu");
+
+        if (btn && menu) {
+            btn.addEventListener("click", () => {
+                menu.classList.toggle("hidden");
+            });
+        }
     }
 }
 

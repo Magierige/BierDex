@@ -153,3 +153,72 @@ export async function changeUsername(newUsername) {
         throw new Error(message);
     }
 }
+
+export async function isAdmin() {
+    const response = await fetch("/api/auth/status", {
+        method: "GET",
+        credentials: "include"
+    });
+    if (response.status != 200) {
+        console.log("geen 200 error");
+        return false;
+    }
+    let jroles = await response.json();
+    if (jroles.roles == null) {
+        console.log("no roll");
+        return false
+    }
+    let roles = jroles.roles;
+    if (roles.includes("Admin")) {
+        console.log("isadmin");
+        return true
+    }
+    console.log("laatste stap no admin")
+    return false
+} 
+
+export async function isSupplier() {
+    const response = await fetch("/api/auth/status", {
+        method: "GET",
+        credentials: "include"
+    });
+    if (response.status != 200) {
+        console.log("geen 200 error");
+        return false;
+    }
+    let jroles = await response.json();
+    if (jroles.roles == null) {
+        console.log("no roll");
+        return false
+    }
+    let roles = jroles.roles;
+    if (roles.includes("Supplier")) {
+        console.log("issupplier");
+        return true
+    }
+    console.log("laatste stap no supplier")
+    return false
+} 
+
+export async function isHigherUser() {
+    const response = await fetch("/api/auth/status", {
+        method: "GET",
+        credentials: "include"
+    });
+    if (response.status != 200) {
+        console.log("geen 200 error");
+        return false;
+    }
+    let jroles = await response.json();
+    if (jroles.roles == null) {
+        console.log("no roll");
+        return false
+    }
+    let roles = jroles.roles;
+    if (roles.includes("Supplier") || roles.includes("Admin")) {
+        console.log("issupplier or isadmin");
+        return true
+    }
+    console.log("laatste stap no supplier or admin")
+    return false
+} 
