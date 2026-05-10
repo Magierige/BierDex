@@ -83,7 +83,7 @@ export default class extends AbstractView {
 
                     // Navigeer of ververs de pagina
                     window.dispatchEvent(
-                        new CustomEvent("spa-navigation", { detail: "/admin/users" }) // Pas dit aan naar je user-overzicht
+                        new CustomEvent("spa-navigation", { detail: "/create-user" }) // Pas dit aan naar je user-overzicht
                     );
                 }, 2000);
 
