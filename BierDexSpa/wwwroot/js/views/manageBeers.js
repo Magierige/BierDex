@@ -102,30 +102,25 @@ export default class extends AbstractView {
         // Handle Save
         editForm?.addEventListener("submit", async (e) => { // Added async here
             e.preventDefault();
-            console.log("Save button clicked, processing form submission...");
             // 1. Get the values from the form
             const id = document.getElementById("editBeerId").value;
             const name = document.getElementById("editName").value;
             const type = document.getElementById("editType").value;
-            console.log(id)
             // 2. Find the beer in your local array to get all its current data
             const beerIndex = this.beerData.findIndex(b => b.id == id);
 
             if (beerIndex > -1) {
                 // Create the object to send to the API
                 // We spread the existing beer data and overwrite the changed fields
-                console.log("if")
                 const updatedFields = {
                     ...this.beerData[beerIndex],
                     name: name,
                     type: type
                 };
-                console.log("gonna try");
                 try {
                     // 3. Call the API function
                     // Note: Ensure 'updatedFields' has the correct 'id' property your API expects
                     const serverResponse = await updateBeer(updatedFields);
-                    console.log("API call completed, processing response...");
                     if (serverResponse) {
                         // 4. Update the local state with the server's version
                         this.beerData[beerIndex] = serverResponse;

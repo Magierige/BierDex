@@ -160,21 +160,17 @@ export async function isAdmin() {
         credentials: "include"
     });
     if (response.status != 200) {
-        console.log("geen 200 error");
         return false;
     }
     let jroles = await response.json();
     if (jroles.roles == null) {
-        console.log("no roll");
-        return false
+        return false;
     }
     let roles = jroles.roles;
     if (roles.includes("Admin")) {
-        console.log("isadmin");
-        return true
+        return true;
     }
-    console.log("laatste stap no admin")
-    return false
+    return false;
 } 
 
 export async function isSupplier() {
@@ -183,21 +179,17 @@ export async function isSupplier() {
         credentials: "include"
     });
     if (response.status != 200) {
-        console.log("geen 200 error");
         return false;
     }
     let jroles = await response.json();
     if (jroles.roles == null) {
-        console.log("no roll");
-        return false
+        return false;
     }
     let roles = jroles.roles;
     if (roles.includes("Supplier")) {
-        console.log("issupplier");
-        return true
+        return true;
     }
-    console.log("laatste stap no supplier")
-    return false
+    return false;
 } 
 
 export async function isHigherUser() {
@@ -206,21 +198,17 @@ export async function isHigherUser() {
         credentials: "include"
     });
     if (response.status != 200) {
-        console.log("geen 200 error");
         return false;
     }
     let jroles = await response.json();
     if (jroles.roles == null) {
-        console.log("no roll");
-        return false
+        return false;
     }
     let roles = jroles.roles;
     if (roles.includes("Supplier") || roles.includes("Admin")) {
-        console.log("issupplier or isadmin");
-        return true
+        return true;
     }
-    console.log("laatste stap no supplier or admin")
-    return false
+    return false;
 } 
 
 export async function createUser(email, username, role) {
