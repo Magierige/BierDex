@@ -43,5 +43,16 @@ namespace BierDex.Services
             await _context.SaveChangesAsync();
             return (true, "Bier succesvol verwijderd.");
         }
+
+        public async Task<(bool Success, string Message, Beer? Beer)> CreateBeerAsync(Beer newBeer, string userId, bool isAdmin, bool isSupplier)
+        {
+            if (!isAdmin && !isSupplier)
+                return (false, "Je hebt geen toestemming om een bier aan te maken.", null);
+
+            newBeer.userId = userId;
+            _context.Beers.Add(newBeer);
+            await _context.SaveChangesAsync();
+            return (true, "Bier succesvol aangemaakt.", newBeer);
+        }
     }
 }

@@ -1,14 +1,17 @@
 ﻿using BierDex.Data;
 using BierDex.Models;
 using BierDex.Services;
+using BierDex.Services;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
-using BierDex.Services;
 
 namespace BierDex.Controllers
 {
+    public record BeerCreateRequest(int barcode, string name, string type, double abv, string imagePath);
+
     [ApiController]
     [Route("api/beer")]
     public class BeerController : ControllerBase
@@ -53,14 +56,27 @@ namespace BierDex.Controllers
 
         [HttpPost]
         [Authorize]
-        public async Task<ActionResult<Beer>> CreateBeer([FromBody] Beer beer)
+        public async Task<ActionResult<Beer>> CreateBeer([FromBody] BeerCreateRequest beer)
         {
-            // Koppel het bier automatisch aan de ingelogde gebruiker
-            beer.userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var isAdmin = User.IsInRole("Admin");
+            var isSupplier = User.IsInRole("Supplier");
 
-            _context.Beers.Add(beer);
-            await _context.SaveChangesAsync();
-            return CreatedAtAction(nameof(GetAllBeers), new { id = beer.Id }, beer);
+            var newBeer = new Beer
+            {
+                name = beer.name,
+                type = beer.type,
+                abv = beer.abv.ToString() + "%",
+                imagePath = beer.imagePath,
+                approved = false, // New beers are not approved by default
+                userId = userId,
+                barcode = beer.barcode
+            };
+
+            var result = await _beerService.CreateBeerAsync(newBeer, userId, isAdmin, isSupplier);
+
+            if (!result.Success) return Unauthorized(result.Message);
+            return CreatedAtAction(nameof(GetAllBeers), new { id = result.Beer?.Id }, result.Beer);
         }
 
         [HttpPut("{id}")]

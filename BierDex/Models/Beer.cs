@@ -40,9 +40,8 @@ namespace BierDex.Models
         public string userId { get; set; }
 
         // Constructor
-        public Beer(int id, int barcode, string name, string type, string imagePath, string abv, IdentityUser user)
+        public Beer(int barcode, string name, string type, string imagePath, string abv, IdentityUser user)
         {
-            this.Id = id;
             this.barcode = barcode;
             this.name = name;
             this.type = type;
