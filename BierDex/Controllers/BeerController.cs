@@ -11,7 +11,7 @@ using System.Security.Claims;
 
 namespace BierDex.Controllers
 {
-    public record BeerCreateRequest(int barcode, string name, string type, double abv, IFormFile image);
+    public record BeerCreateRequest(string barcode, string name, string type, double abv, IFormFile image);
 
     [ApiController]
     [Route("api/beer")]
