@@ -6,12 +6,24 @@
                 <h1 class="text-4xl font-black tracking-tight text-gray-900 uppercase">My biertjes</h1>
                 <p class="text-gray-500 mt-2 italic">Vind jouw volgende favoriet.</p>
             </div>
-            <button id="openSearchBtn" class="px-6 py-3 bg-amber-500 text-white rounded-xl font-black uppercase text-sm">
-                Zoek op Barcode
-            </button>
-            <button id="openAddModalBtn" class="px-6 py-3 bg-green-600 text-white rounded-xl font-black uppercase text-sm">
-                + Nieuw Bier
-            </button>
+
+            <!-- NIEUW: TOGGLE SECTIE -->
+            <div class="flex items-center gap-3 bg-gray-100 p-2 rounded-xl border border-gray-200">
+                <span class="text-[10px] font-black uppercase text-gray-500 ml-2">Alleen niet goedgekeurd</span>
+                <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" id="unapprovedToggle" class="sr-only peer">
+                    <div class="w-11 h-6 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500"></div>
+                </label>
+            </div>
+
+            <div class="flex gap-2">
+                <button id="openSearchBtn" class="px-6 py-3 bg-amber-500 text-white rounded-xl font-black uppercase text-sm">
+                    Zoek op Barcode
+                </button>
+                <button id="openAddModalBtn" class="px-6 py-3 bg-green-600 text-white rounded-xl font-black uppercase text-sm">
+                    + Nieuw Bier
+                </button>
+            </div>
         </div>
 
         <!-- This is where the JS will inject the cards -->
@@ -142,6 +154,9 @@
                     <span class="beer-abv text-md font-bold text-gray-800"></span>
                 </div>
                 <div class="flex gap-2">
+                    <button class="approve-beer-btn hidden h-10 px-3 rounded-xl bg-green-100 text-green-600 flex items-center justify-center hover:bg-green-200 transition-all text-[10px] font-black uppercase">
+                        Approve
+                    </button>
                     <!-- EDIT BUTTON -->
                     <button class="edit-beer-btn h-10 w-10 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center hover:bg-amber-200 transition-all">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

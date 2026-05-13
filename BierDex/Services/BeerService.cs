@@ -54,5 +54,15 @@ namespace BierDex.Services
             await _context.SaveChangesAsync();
             return (true, "Bier succesvol aangemaakt.", newBeer);
         }
+
+        public async Task<(bool Success, string Message, Beer? Beer)> ApproveBeerAsync(int id)
+        {
+            var beer = await _context.Beers.FindAsync(id);
+            if (beer == null) return (false, "Bier niet gevonden.", null);
+
+            beer.approved = true;
+            await _context.SaveChangesAsync();
+            return (true, "Bier succesvol goedgekeurd.", beer);
+        }
     }
 }
