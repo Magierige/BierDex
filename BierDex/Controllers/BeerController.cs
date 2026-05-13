@@ -33,7 +33,9 @@ namespace BierDex.Controllers
         public async Task<ActionResult<IEnumerable<Beer>>> GetAllBeers()
         {
             // Use ToListAsync to keep the API responsive and non-blocking
-            var beers = await _context.Beers.ToListAsync();
+            var beers = await _context.Beers
+                .Where(b => b.approved == true)
+                .ToListAsync();
 
             return Ok(beers);
         }
