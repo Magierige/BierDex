@@ -49,6 +49,7 @@ secrets.json
 ############################
 publish/
 wwwroot/dist/
+wwwroot/uploads/*
 
 ############################
 # Entity Framework
