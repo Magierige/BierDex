@@ -49,7 +49,7 @@ secrets.json
 ############################
 publish/
 wwwroot/dist/
-wwwroot/uploads/*
+/BierDex/wwwroot/uploads/*
 
 ############################
 # Entity Framework
@@ -86,3 +86,4 @@ copilot/
 .copilot-chat/
 copilot-chat/
 *.copilot-chat
+
