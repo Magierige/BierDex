@@ -38,6 +38,7 @@ export async function updateBeer(beer) {
         return updatedBeer;
     } catch (error) {
         console.error("Error:", error);
+        throw error
     }
 }
 
@@ -49,7 +50,7 @@ export async function deleteBeer(beerId) {
 
         if (!response.ok) {
             const errorData = await response.text();
-            throw new Error(errorData || "Could not delete beer");
+            throw new Error(errorData || "kon bier niet updaten");
         }
 
         return true;

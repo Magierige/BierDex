@@ -46,7 +46,7 @@ export default class extends AbstractView {
             clone.querySelector('.beer-type').textContent = beer.type;
             clone.querySelector('.beer-abv').textContent = beer.abv;
             clone.querySelector('.beer-rating').textContent = getRandomBeerRating();
-            clone.querySelector('.beer-img').src = beer.imagePath;
+            clone.querySelector('.beer-img').src = 'https://localhost:7228/' + beer.imagePath;
             clone.querySelector('.edit-beer-btn').addEventListener('click', () => {
                 this.openEditModal(beer);
             });
@@ -59,7 +59,7 @@ export default class extends AbstractView {
         document.getElementById("editBeerBarcode").value = beer.barcode; 
         document.getElementById("editName").value = beer.name;
         document.getElementById("editType").value = beer.type;
-        document.getElementById("editAbv").value = beer.abv;
+        document.getElementById("editAbv").value = beer.abv.replace("%", "");
         document.getElementById("editModal").classList.remove("hidden");
     }
 
@@ -115,14 +115,16 @@ export default class extends AbstractView {
         // Handle Save
         editForm?.addEventListener("submit", async (e) => { // Added async here
             e.preventDefault();
+            console.log("Save edit button clicked, starting update process...");
 
             // 1. Get the values from the form
             const id = document.getElementById("editBeerId").value;
             const name = document.getElementById("editName").value;
             const type = document.getElementById("editType").value;
+            const abv = document.getElementById("editAbv").value + '%';
 
             // 2. Find the beer in your local array to get all its current data
-            const beerIndex = this.beerData.findIndex(b => b.barcode == id);
+            const beerIndex = this.beerData.findIndex(b => b.id == id);
 
             if (beerIndex > -1) {
                 // Create the object to send to the API
@@ -130,8 +132,10 @@ export default class extends AbstractView {
                 const updatedFields = {
                     ...this.beerData[beerIndex],
                     name: name,
-                    type: type
+                    type: type,
+                    abv: abv
                 };
+                console.log(updatedFields)
 
                 try {
                     // 3. Call the API function
@@ -218,7 +222,7 @@ export default class extends AbstractView {
         const foundBeer = this.beerData.find(b => b.barcode == query);
 
         if (foundBeer) {
-            document.getElementById("resultImg").src = foundBeer.imagePath;
+            document.getElementById("resultImg").src = 'https://localhost:7228/' + foundBeer.imagePath;
             document.getElementById("resultName").innerText = foundBeer.name;
             document.getElementById("resultType").innerText = foundBeer.type;
             resultDiv.classList.remove("hidden");
