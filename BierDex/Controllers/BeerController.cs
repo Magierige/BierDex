@@ -1,4 +1,5 @@
-﻿using BierDex.Data;
+﻿using Azure.Core;
+using BierDex.Data;
 using BierDex.Models;
 using BierDex.Services;
 using BierDex.Services;
@@ -10,7 +11,7 @@ using System.Security.Claims;
 
 namespace BierDex.Controllers
 {
-    public record BeerCreateRequest(int barcode, string name, string type, double abv, string imagePath);
+    public record BeerCreateRequest(int barcode, string name, string type, double abv, IFormFile image);
 
     [ApiController]
     [Route("api/beer")]
@@ -18,12 +19,14 @@ namespace BierDex.Controllers
     {
         private readonly BierdexDBContext _context;
         private readonly BeerService _beerService;
+        private readonly ImageService _imageservice;
 
         // The DbContext is injected via the constructor
-        public BeerController(BierdexDBContext context, BeerService beerService)
+        public BeerController(BierdexDBContext context, BeerService beerService, ImageService imageservice)
         {
             _context = context;
             _beerService = beerService;
+            _imageservice = imageservice;
         }
 
         [HttpGet("all")]
@@ -54,20 +57,37 @@ namespace BierDex.Controllers
             return Ok(userBeers);
         }
 
-        [HttpPost]
+        [HttpPost("upload-beer")]
         [Authorize]
-        public async Task<ActionResult<Beer>> CreateBeer([FromBody] BeerCreateRequest beer)
+        public async Task<ActionResult<Beer>> CreateBeer([FromForm] BeerCreateRequest beer)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var isAdmin = User.IsInRole("Admin");
             var isSupplier = User.IsInRole("Supplier");
+
+            string savedImagePath = "/uploads/default-beer.png"; // Standaard pad
+
+            // 1. Check of er een afbeelding is geüpload en sla deze op
+            if (beer.image != null)
+            {
+                try
+                {
+                    // Gebruik de service die we eerder hebben gemaakt
+                    // We slaan bier-afbeeldingen op in de map "beers"
+                    savedImagePath = await _imageservice.UploadImageAsync(beer.image, "beers");
+                }
+                catch (Exception ex)
+                {
+                    return BadRequest($"Fout bij uploaden afbeelding: {ex.Message}");
+                }
+            }
 
             var newBeer = new Beer
             {
                 name = beer.name,
                 type = beer.type,
                 abv = beer.abv.ToString() + "%",
-                imagePath = beer.imagePath,
+                imagePath = savedImagePath,
                 approved = false, // New beers are not approved by default
                 userId = userId,
                 barcode = beer.barcode
