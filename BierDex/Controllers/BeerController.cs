@@ -40,6 +40,16 @@ namespace BierDex.Controllers
             return Ok(beers);
         }
 
+        [HttpGet("all-admin")]
+        public async Task<ActionResult<IEnumerable<Beer>>> GetAllBeersAdmin()
+        {
+            // Use ToListAsync to keep the API responsive and non-blocking
+            var beers = await _context.Beers
+                .ToListAsync();
+
+            return Ok(beers);
+        }
+
         [HttpGet("my-beers")]
         [Authorize]
         public async Task<ActionResult<IEnumerable<Beer>>> GetUserBeers()
@@ -125,6 +135,17 @@ namespace BierDex.Controllers
 
             if (!result.Success) return Unauthorized(result.Message);
             return NoContent();
+        }
+
+        [HttpPut("approve/{id}")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> ApproveBeer(int id)
+        {
+
+            var result = await _beerService.ApproveBeerAsync(id);
+
+            if (!result.Success) return Unauthorized(result.Message);
+            return Ok(result.Beer);
         }
     }
 }
