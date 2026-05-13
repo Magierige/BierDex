@@ -9,7 +9,8 @@ namespace BierDex.Models
         public int Id { get; set; }
 
         [Required(ErrorMessage = "Barcode is verplicht")]
-        public int barcode { get; set; }
+        [RegularExpression(@"^\d{8,13}$", ErrorMessage = "Ongeldig formaat. Gebruik een geldige barcode van 8 tot 13 cijfers.")]
+        public string barcode { get; set; }
 
         [Required(ErrorMessage = "Naam is verplicht")]
         [StringLength(100, MinimumLength = 2, ErrorMessage = "Naam moet tussen 2 en 100 tekens zijn")]
@@ -40,7 +41,7 @@ namespace BierDex.Models
         public string userId { get; set; }
 
         // Constructor
-        public Beer(int barcode, string name, string type, string imagePath, string abv, IdentityUser user)
+        public Beer(string barcode, string name, string type, string imagePath, string abv, IdentityUser user)
         {
             this.barcode = barcode;
             this.name = name;

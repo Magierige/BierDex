@@ -29,3 +29,12 @@ body {
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
   text-align: start;
 }
+
+#reader video {
+    border-radius: 1rem;
+    object-fit: cover;
+}
+
+#reader {
+    border: none !important;
+}

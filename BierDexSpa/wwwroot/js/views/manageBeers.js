@@ -1,13 +1,16 @@
 ﻿import AbstractView from "../abstractView.js";
-import { getMyBeers, getRandomBeerRating, updateBeer, deleteBeer, createBeer, getAllBeersAdmin, approveBeer } from "../api/beerApi.js";
+import { getMyBeers, updateBeer, deleteBeer, createBeer, getAllBeersAdmin, approveBeer } from "../api/beerApi.js";
 import { isAdmin } from "../api/authApi.js";
+import { BeerService } from "../services/beerService.js";
+import { ScannerService } from "../services/scannerService.js";
 
 export default class extends AbstractView {
     constructor() {
         super();
         this.setTitle("Manage Beers");
         this.beerData = [];
-        this.userIsAdmin = false
+        this.userIsAdmin = false;
+        this.scanner = null;
     }
 
     async getHtml() {
@@ -25,13 +28,11 @@ export default class extends AbstractView {
 
     async init() {
         this.userIsAdmin = await isAdmin();
-        if (this.userIsAdmin) {
-            this.beerData = await getAllBeersAdmin();
-        } else {
-            this.beerData = await getMyBeers();
-        }
+        this.beerData = this.userIsAdmin ? await getAllBeersAdmin() : await getMyBeers();
+
         this.renderBeers();
         this.setupEventListeners();
+        this.scanner = new ScannerService("reader");
     }
 
     renderBeers() {
@@ -40,243 +41,151 @@ export default class extends AbstractView {
         const toggle = document.getElementById('unapprovedToggle');
 
         if (!grid || !template) return;
-
         grid.innerHTML = '';
 
-        // Filter de data: als toggle aan staat, toon alleen approved == false
-        const showOnlyUnapproved = toggle ? toggle.checked : false;
-
-        const filteredBeers = showOnlyUnapproved
-            ? this.beerData.filter(beer => beer.approved === false)
-            : this.beerData;
+        const filteredBeers = BeerService.filterByStatus(this.beerData, toggle?.checked);
 
         filteredBeers.forEach(beer => {
             const clone = template.content.cloneNode(true);
             const approveBtn = clone.querySelector('.approve-beer-btn');
             const cardContainer = clone.querySelector('.group');
 
-            // Voeg een visuele indicatie toe als een biertje nog niet goedgekeurd is (optioneel)
             if (beer.approved === false) {
                 cardContainer.classList.add('border-amber-200', 'bg-amber-50/30');
-                if (this.userIsAdmin) {
-                    approveBtn.classList.remove('hidden');
-                }
+                if (this.userIsAdmin) approveBtn.classList.remove('hidden');
             }
 
             clone.querySelector('.beer-name').textContent = beer.name;
             clone.querySelector('.beer-type').textContent = beer.type;
             clone.querySelector('.beer-abv').textContent = beer.abv;
-            clone.querySelector('.beer-rating').textContent = getRandomBeerRating();
-            clone.querySelector('.beer-img').src = 'https://localhost:7228/' + beer.imagePath;
+            clone.querySelector('.beer-img').src = BeerService.getImageUrl(beer.imagePath);
 
-            clone.querySelector('.edit-beer-btn').addEventListener('click', () => {
-                this.openEditModal(beer);
-            });
+            clone.querySelector('.edit-beer-btn').addEventListener('click', () => this.openEditModal(beer));
 
-            clone.querySelector('.approve-beer-btn').addEventListener('click', async () => {
+            approveBtn.addEventListener('click', async () => {
                 try {
-                    const updatedBeer = await approveBeer(beer);
-                    
-                    if (updatedBeer) {
-                        // Update the local beerData with the approved beer
+                    if (await approveBeer(beer)) {
                         const index = this.beerData.findIndex(b => b.id === beer.id);
                         this.beerData[index].approved = true;
                         this.renderBeers();
                     }
                 } catch (error) {
-                    alert("Er ging iets mis bij het goedkeuren: " + error.message);
+                    alert("Fout bij goedkeuren: " + error.message);
                 }
             });
 
             grid.appendChild(clone);
         });
 
-        // Toon een melding als er geen bieren zijn in de huidige filter
         if (filteredBeers.length === 0) {
-            grid.innerHTML = '<p class="col-span-full text-center py-10 text-gray-400 italic">Geen biertjes gevonden die aan de filter voldoen.</p>';
+            grid.innerHTML = '<p class="col-span-full text-center py-10 text-gray-400 italic">Geen biertjes gevonden.</p>';
+        }
+    }
+
+    setupEventListeners() {
+        // Toggle Filter
+        document.getElementById('unapprovedToggle')?.addEventListener('change', () => this.renderBeers());
+
+        // Modals openen/sluiten
+        this.bindModalEvents("searchModal", "openSearchBtn", ["closeModalBtn", "modalOverlay"]);
+        this.bindModalEvents("editModal", null, ["closeEditModal", "editModalOverlay"]);
+        this.bindModalEvents("addBeerModal", "openAddModalBtn", ["closeAddModal", "addModalOverlay"]);
+
+        // Delete actie
+        document.getElementById("deleteBeerBtn")?.addEventListener("click", async () => {
+            const id = document.getElementById("editBeerId").value;
+            if (confirm("Weet je zeker dat je dit bier wilt verwijderen?")) {
+                if (await deleteBeer(id)) {
+                    this.beerData = this.beerData.filter(b => b.id != id);
+                    this.renderBeers();
+                    document.getElementById("editModal").classList.add("hidden");
+                }
+            }
+        });
+
+        // Forms
+        document.getElementById("editBeerForm")?.addEventListener("submit", (e) => this.handleEditSubmit(e));
+        document.getElementById("addBeerForm")?.addEventListener("submit", (e) => this.handleAddSubmit(e));
+        document.getElementById("searchBtn")?.addEventListener("click", () => this.handleSearch());
+
+        // Scanner
+        document.getElementById("startScanBtn")?.addEventListener("click", () => {
+            document.getElementById("reader").classList.remove("hidden");
+            this.scanner.start((code) => {
+                document.getElementById("barcodeInput").value = code;
+                this.handleSearch();
+            });
+        });
+    }
+
+    // Helper voor modals om code duplicatie te voorkomen
+    bindModalEvents(modalId, openBtnId, closeSelectors) {
+        const modal = document.getElementById(modalId);
+        if (openBtnId) {
+            document.getElementById(openBtnId)?.addEventListener("click", () => modal.classList.remove("hidden"));
+        }
+        closeSelectors.forEach(sel => {
+            document.getElementById(sel)?.addEventListener("click", () => {
+                modal.classList.add("hidden");
+                this.scanner?.stop();
+            });
+        });
+    }
+
+    handleSearch() {
+        const query = document.getElementById("barcodeInput").value;
+        const foundBeer = BeerService.findBeerByBarcode(this.beerData, query);
+        const resultDiv = document.getElementById("searchResult");
+
+        if (foundBeer) {
+            document.getElementById("resultImg").src = BeerService.getImageUrl(foundBeer.imagePath);
+            document.getElementById("resultName").innerText = foundBeer.name;
+            document.getElementById("resultType").innerText = foundBeer.type;
+            resultDiv.classList.remove("hidden");
+        } else {
+            alert("Bier niet gevonden!");
+            resultDiv.classList.add("hidden");
+        }
+    }
+
+    async handleEditSubmit(e) {
+        e.preventDefault();
+        const id = document.getElementById("editBeerId").value;
+        const beerIndex = this.beerData.findIndex(b => b.id == id);
+
+        const updatedFields = {
+            ...this.beerData[beerIndex],
+            name: document.getElementById("editName").value,
+            type: document.getElementById("editType").value,
+            abv: document.getElementById("editAbv").value + '%'
+        };
+
+        const serverResponse = await updateBeer(updatedFields);
+        if (serverResponse) {
+            this.beerData[beerIndex] = serverResponse;
+            this.renderBeers();
+            document.getElementById("editModal").classList.add("hidden");
+        }
+    }
+
+    async handleAddSubmit(e) {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        console.log(formData)// Haalt automatisch alle velden op
+        const newBeer = await createBeer(formData);
+        if (newBeer) {
+            this.beerData.push(newBeer);
+            this.renderBeers();
+            document.getElementById("addBeerModal").classList.add("hidden");
+            e.target.reset();
         }
     }
 
     openEditModal(beer) {
         document.getElementById("editBeerId").value = beer.id;
-        document.getElementById("editBeerBarcode").value = beer.barcode; 
         document.getElementById("editName").value = beer.name;
         document.getElementById("editType").value = beer.type;
         document.getElementById("editAbv").value = beer.abv.replace("%", "");
         document.getElementById("editModal").classList.remove("hidden");
-    }
-
-    setupEventListeners() {
-        const unapprovedToggle = document.getElementById('unapprovedToggle');
-        unapprovedToggle?.addEventListener('change', () => {
-            this.renderBeers(); // Ververs de grid wanneer de toggle verandert
-        });
-
-        // Search Modal Elements
-        const openBtn = document.getElementById("openSearchBtn");
-        const closeBtn = document.getElementById("closeModalBtn");
-        const overlay = document.getElementById("modalOverlay");
-        const searchBtn = document.getElementById("searchBtn");
-        const modal = document.getElementById("searchModal");
-
-        // Edit Modal Elements
-        const editModal = document.getElementById("editModal");
-        const closeEdit = document.getElementById("closeEditModal");
-        const editOverlay = document.getElementById("editModalOverlay");
-        const deleteBtn = document.getElementById("deleteBeerBtn");
-        const editForm = document.getElementById("editBeerForm");
-
-        // Add Modal Elements
-        const addModal = document.getElementById("addBeerModal");
-        const openAddBtn = document.getElementById("openAddModalBtn");
-        const closeAddBtn = document.getElementById("closeAddModal");
-        const addOverlay = document.getElementById("addModalOverlay");
-        const addForm = document.getElementById("addBeerForm");
-
-        // Open and close listeners
-        [closeEdit, editOverlay].forEach(el => {
-            el?.addEventListener("click", () => editModal.classList.add("hidden"));
-        });
-        openAddBtn?.addEventListener("click", () => addModal.classList.remove("hidden"));
-        [closeAddBtn, addOverlay].forEach(el => {
-            el?.addEventListener("click", () => addModal.classList.add("hidden"));
-        });
-
-        // Handle Delete
-        deleteBtn?.addEventListener("click", async () => {
-            const id = document.getElementById("editBeerId").value;
-            if (confirm("Weet je zeker dat je dit bier wilt verwijderen?")) {
-                try {
-                    const serverResponse = await deleteBeer(id);
-                    if (serverResponse) {
-                        this.beerData = this.beerData.filter(b => b.barcode != id);
-                        this.renderBeers();
-                        editModal.classList.add("hidden");
-                        alert("Biertje succesvol verwijderd!");
-                    }
-                } catch (error) {
-                    alert("Er ging iets mis bij het verwijderen: " + error.message);
-                }
-            }
-        });
-
-        // Handle Save
-        editForm?.addEventListener("submit", async (e) => { // Added async here
-            e.preventDefault();
-            console.log("Save edit button clicked, starting update process...");
-
-            // 1. Get the values from the form
-            const id = document.getElementById("editBeerId").value;
-            const name = document.getElementById("editName").value;
-            const type = document.getElementById("editType").value;
-            const abv = document.getElementById("editAbv").value + '%';
-
-            // 2. Find the beer in your local array to get all its current data
-            const beerIndex = this.beerData.findIndex(b => b.id == id);
-
-            if (beerIndex > -1) {
-                // Create the object to send to the API
-                // We spread the existing beer data and overwrite the changed fields
-                const updatedFields = {
-                    ...this.beerData[beerIndex],
-                    name: name,
-                    type: type,
-                    abv: abv
-                };
-                console.log(updatedFields)
-
-                try {
-                    // 3. Call the API function
-                    // Note: Ensure 'updatedFields' has the correct 'id' property your API expects
-                    const serverResponse = await updateBeer(updatedFields);
-
-                    if (serverResponse) {
-                        // 4. Update the local state with the server's version
-                        this.beerData[beerIndex] = serverResponse;
-
-                        // 5. Refresh the UI and close modal
-                        this.renderBeers();
-                        editModal.classList.add("hidden");
-
-                        alert("Biertje succesvol bijgewerkt!");
-                    }
-                } catch (error) {
-                    alert("Er ging iets mis bij het opslaan: " + error.message);
-                }
-            }
-        });
-
-        addForm?.addEventListener("submit", async (e) => {
-            e.preventDefault();
-
-            // Gebruik FormData om zowel tekst als bestanden te versturen
-            const formData = new FormData();
-            formData.append("barcode", document.getElementById("addBarcode").value);
-            formData.append("name", document.getElementById("addName").value);
-            formData.append("type", document.getElementById("addType").value);
-            formData.append("abv", document.getElementById("addAbv").value);
-
-            const imageFile = document.getElementById("addImage").files[0];
-            if (imageFile) {
-                formData.append("image", imageFile); // 'image' moet matchen met je C# record naam
-            }
-
-            try {
-                const newBeer = await createBeer(formData);
-
-                if (newBeer) {
-                    this.beerData.push(newBeer);
-                    this.renderBeers();
-                    addModal.classList.add("hidden");
-                    addForm.reset();
-                    alert("Biertje succesvol toegevoegd!");
-                }
-            } catch (error) {
-                alert("Fout: " + error.message);
-            }
-        });
-
-        // Open Modal
-        if (openBtn) {
-            openBtn.addEventListener("click", () => {
-                modal.classList.remove("hidden");
-                document.getElementById("barcodeInput").focus();
-            });
-        }
-
-        // Close Modal (Button or Overlay)
-        const closeActions = [closeBtn, overlay];
-        closeActions.forEach(el => {
-            if (el) el.addEventListener("click", () => {
-                modal.classList.add("hidden");
-                document.getElementById("searchResult").classList.add("hidden");
-                document.getElementById("barcodeInput").value = "";
-            });
-        });
-
-        // Search Action
-        if (searchBtn) {
-            searchBtn.addEventListener("click", (e) => {
-                e.preventDefault();
-                this.handleSearch();
-            });
-        }
-    }
-
-    handleSearch() {
-        const query = document.getElementById("barcodeInput").value.trim();
-        const resultDiv = document.getElementById("searchResult");
-
-        const foundBeer = this.beerData.find(b => b.barcode == query);
-
-        if (foundBeer) {
-            document.getElementById("resultImg").src = 'https://localhost:7228/' + foundBeer.imagePath;
-            document.getElementById("resultName").innerText = foundBeer.name;
-            document.getElementById("resultType").innerText = foundBeer.type;
-            resultDiv.classList.remove("hidden");
-        } else {
-            alert("Bier niet gevonden! Probeer '001' of '010'.");
-            resultDiv.classList.add("hidden");
-        }
     }
 }
