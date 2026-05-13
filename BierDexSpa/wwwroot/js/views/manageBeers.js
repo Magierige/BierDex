@@ -1,5 +1,5 @@
 ﻿import AbstractView from "../abstractView.js";
-import { getAllBeers, getMyBeers, getRandomBeerRating, updateBeer, deleteBeer } from "../api/beerApi.js";
+import { getAllBeers, getMyBeers, getRandomBeerRating, updateBeer, deleteBeer, createBeer } from "../api/beerApi.js";
 import { isAdmin } from "../api/authApi.js";
 
 export default class extends AbstractView {
@@ -46,7 +46,7 @@ export default class extends AbstractView {
             clone.querySelector('.beer-type').textContent = beer.type;
             clone.querySelector('.beer-abv').textContent = beer.abv;
             clone.querySelector('.beer-rating').textContent = getRandomBeerRating();
-            clone.querySelector('.beer-img').src = beer.imagePath;
+            clone.querySelector('.beer-img').src = 'https://localhost:7228/' + beer.imagePath;
             clone.querySelector('.edit-beer-btn').addEventListener('click', () => {
                 this.openEditModal(beer);
             });
@@ -59,26 +59,39 @@ export default class extends AbstractView {
         document.getElementById("editBeerBarcode").value = beer.barcode; 
         document.getElementById("editName").value = beer.name;
         document.getElementById("editType").value = beer.type;
-        document.getElementById("editAbv").value = beer.abv;
+        document.getElementById("editAbv").value = beer.abv.replace("%", "");
         document.getElementById("editModal").classList.remove("hidden");
     }
 
     setupEventListeners() {
+        // Search Modal Elements
         const openBtn = document.getElementById("openSearchBtn");
         const closeBtn = document.getElementById("closeModalBtn");
         const overlay = document.getElementById("modalOverlay");
         const searchBtn = document.getElementById("searchBtn");
         const modal = document.getElementById("searchModal");
 
+        // Edit Modal Elements
         const editModal = document.getElementById("editModal");
         const closeEdit = document.getElementById("closeEditModal");
         const editOverlay = document.getElementById("editModalOverlay");
         const deleteBtn = document.getElementById("deleteBeerBtn");
         const editForm = document.getElementById("editBeerForm");
 
-        // Close listeners
+        // Add Modal Elements
+        const addModal = document.getElementById("addBeerModal");
+        const openAddBtn = document.getElementById("openAddModalBtn");
+        const closeAddBtn = document.getElementById("closeAddModal");
+        const addOverlay = document.getElementById("addModalOverlay");
+        const addForm = document.getElementById("addBeerForm");
+
+        // Open and close listeners
         [closeEdit, editOverlay].forEach(el => {
             el?.addEventListener("click", () => editModal.classList.add("hidden"));
+        });
+        openAddBtn?.addEventListener("click", () => addModal.classList.remove("hidden"));
+        [closeAddBtn, addOverlay].forEach(el => {
+            el?.addEventListener("click", () => addModal.classList.add("hidden"));
         });
 
         // Handle Delete
@@ -102,14 +115,16 @@ export default class extends AbstractView {
         // Handle Save
         editForm?.addEventListener("submit", async (e) => { // Added async here
             e.preventDefault();
+            console.log("Save edit button clicked, starting update process...");
 
             // 1. Get the values from the form
             const id = document.getElementById("editBeerId").value;
             const name = document.getElementById("editName").value;
             const type = document.getElementById("editType").value;
+            const abv = document.getElementById("editAbv").value + '%';
 
             // 2. Find the beer in your local array to get all its current data
-            const beerIndex = this.beerData.findIndex(b => b.barcode == id);
+            const beerIndex = this.beerData.findIndex(b => b.id == id);
 
             if (beerIndex > -1) {
                 // Create the object to send to the API
@@ -117,8 +132,10 @@ export default class extends AbstractView {
                 const updatedFields = {
                     ...this.beerData[beerIndex],
                     name: name,
-                    type: type
+                    type: type,
+                    abv: abv
                 };
+                console.log(updatedFields)
 
                 try {
                     // 3. Call the API function
@@ -138,6 +155,36 @@ export default class extends AbstractView {
                 } catch (error) {
                     alert("Er ging iets mis bij het opslaan: " + error.message);
                 }
+            }
+        });
+
+        addForm?.addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            // Gebruik FormData om zowel tekst als bestanden te versturen
+            const formData = new FormData();
+            formData.append("barcode", document.getElementById("addBarcode").value);
+            formData.append("name", document.getElementById("addName").value);
+            formData.append("type", document.getElementById("addType").value);
+            formData.append("abv", document.getElementById("addAbv").value);
+
+            const imageFile = document.getElementById("addImage").files[0];
+            if (imageFile) {
+                formData.append("image", imageFile); // 'image' moet matchen met je C# record naam
+            }
+
+            try {
+                const newBeer = await createBeer(formData);
+
+                if (newBeer) {
+                    this.beerData.push(newBeer);
+                    this.renderBeers();
+                    addModal.classList.add("hidden");
+                    addForm.reset();
+                    alert("Biertje succesvol toegevoegd!");
+                }
+            } catch (error) {
+                alert("Fout: " + error.message);
             }
         });
 
@@ -175,7 +222,7 @@ export default class extends AbstractView {
         const foundBeer = this.beerData.find(b => b.barcode == query);
 
         if (foundBeer) {
-            document.getElementById("resultImg").src = foundBeer.imagePath;
+            document.getElementById("resultImg").src = 'https://localhost:7228/' + foundBeer.imagePath;
             document.getElementById("resultName").innerText = foundBeer.name;
             document.getElementById("resultType").innerText = foundBeer.type;
             resultDiv.classList.remove("hidden");

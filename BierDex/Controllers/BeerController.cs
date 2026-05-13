@@ -1,33 +1,41 @@
-﻿using BierDex.Data;
+﻿using Azure.Core;
+using BierDex.Data;
 using BierDex.Models;
 using BierDex.Services;
+using BierDex.Services;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
-using BierDex.Services;
 
 namespace BierDex.Controllers
 {
+    public record BeerCreateRequest(int barcode, string name, string type, double abv, IFormFile image);
+
     [ApiController]
     [Route("api/beer")]
     public class BeerController : ControllerBase
     {
         private readonly BierdexDBContext _context;
         private readonly BeerService _beerService;
+        private readonly ImageService _imageservice;
 
         // The DbContext is injected via the constructor
-        public BeerController(BierdexDBContext context, BeerService beerService)
+        public BeerController(BierdexDBContext context, BeerService beerService, ImageService imageservice)
         {
             _context = context;
             _beerService = beerService;
+            _imageservice = imageservice;
         }
 
         [HttpGet("all")]
         public async Task<ActionResult<IEnumerable<Beer>>> GetAllBeers()
         {
             // Use ToListAsync to keep the API responsive and non-blocking
-            var beers = await _context.Beers.ToListAsync();
+            var beers = await _context.Beers
+                .Where(b => b.approved == true)
+                .ToListAsync();
 
             return Ok(beers);
         }
@@ -51,16 +59,46 @@ namespace BierDex.Controllers
             return Ok(userBeers);
         }
 
-        [HttpPost]
+        [HttpPost("upload-beer")]
         [Authorize]
-        public async Task<ActionResult<Beer>> CreateBeer([FromBody] Beer beer)
+        public async Task<ActionResult<Beer>> CreateBeer([FromForm] BeerCreateRequest beer)
         {
-            // Koppel het bier automatisch aan de ingelogde gebruiker
-            beer.userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var isAdmin = User.IsInRole("Admin");
+            var isSupplier = User.IsInRole("Supplier");
 
-            _context.Beers.Add(beer);
-            await _context.SaveChangesAsync();
-            return CreatedAtAction(nameof(GetAllBeers), new { id = beer.Id }, beer);
+            string savedImagePath = "/uploads/default-beer.png"; // Standaard pad
+
+            // 1. Check of er een afbeelding is geüpload en sla deze op
+            if (beer.image != null)
+            {
+                try
+                {
+                    // Gebruik de service die we eerder hebben gemaakt
+                    // We slaan bier-afbeeldingen op in de map "beers"
+                    savedImagePath = await _imageservice.UploadImageAsync(beer.image, "beers");
+                }
+                catch (Exception ex)
+                {
+                    return BadRequest($"Fout bij uploaden afbeelding: {ex.Message}");
+                }
+            }
+
+            var newBeer = new Beer
+            {
+                name = beer.name,
+                type = beer.type,
+                abv = beer.abv.ToString() + "%",
+                imagePath = savedImagePath,
+                approved = false, // New beers are not approved by default
+                userId = userId,
+                barcode = beer.barcode
+            };
+
+            var result = await _beerService.CreateBeerAsync(newBeer, userId, isAdmin, isSupplier);
+
+            if (!result.Success) return Unauthorized(result.Message);
+            return CreatedAtAction(nameof(GetAllBeers), new { id = result.Beer?.Id }, result.Beer);
         }
 
         [HttpPut("{id}")]

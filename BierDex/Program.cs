@@ -42,8 +42,12 @@ builder.Services.AddCors(options =>
 });
 
 builder.Services.AddScoped<BeerService>();
+builder.Services.AddScoped<ImageService>();
 
 var app = builder.Build();
+
+app.UseDefaultFiles();
+app.UseStaticFiles();
 
 app.UseCors();
 
