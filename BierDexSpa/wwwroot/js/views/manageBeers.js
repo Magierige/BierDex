@@ -1,13 +1,13 @@
 ﻿import AbstractView from "../abstractView.js";
-import { getAllBeers, getMyBeers, getRandomBeerRating, updateBeer, deleteBeer, createBeer } from "../api/beerApi.js";
+import { getMyBeers, getRandomBeerRating, updateBeer, deleteBeer, createBeer, getAllBeersAdmin, approveBeer } from "../api/beerApi.js";
 import { isAdmin } from "../api/authApi.js";
 
 export default class extends AbstractView {
     constructor() {
         super();
         this.setTitle("Manage Beers");
-        this.beerData = [
-        ];
+        this.beerData = [];
+        this.userIsAdmin = false
     }
 
     async getHtml() {
@@ -24,8 +24,9 @@ export default class extends AbstractView {
     }
 
     async init() {
-        if (await isAdmin()) {
-            this.beerData = await getAllBeers();
+        this.userIsAdmin = await isAdmin();
+        if (this.userIsAdmin) {
+            this.beerData = await getAllBeersAdmin();
         } else {
             this.beerData = await getMyBeers();
         }
@@ -34,24 +35,66 @@ export default class extends AbstractView {
     }
 
     renderBeers() {
-
         const grid = document.getElementById('beer-grid');
         const template = document.getElementById('beer-card-template');
+        const toggle = document.getElementById('unapprovedToggle');
+
         if (!grid || !template) return;
 
         grid.innerHTML = '';
-        this.beerData.forEach(beer => {
+
+        // Filter de data: als toggle aan staat, toon alleen approved == false
+        const showOnlyUnapproved = toggle ? toggle.checked : false;
+
+        const filteredBeers = showOnlyUnapproved
+            ? this.beerData.filter(beer => beer.approved === false)
+            : this.beerData;
+
+        filteredBeers.forEach(beer => {
             const clone = template.content.cloneNode(true);
+            const approveBtn = clone.querySelector('.approve-beer-btn');
+            const cardContainer = clone.querySelector('.group');
+
+            // Voeg een visuele indicatie toe als een biertje nog niet goedgekeurd is (optioneel)
+            if (beer.approved === false) {
+                cardContainer.classList.add('border-amber-200', 'bg-amber-50/30');
+                if (this.userIsAdmin) {
+                    approveBtn.classList.remove('hidden');
+                }
+            }
+
             clone.querySelector('.beer-name').textContent = beer.name;
             clone.querySelector('.beer-type').textContent = beer.type;
             clone.querySelector('.beer-abv').textContent = beer.abv;
             clone.querySelector('.beer-rating').textContent = getRandomBeerRating();
             clone.querySelector('.beer-img').src = 'https://localhost:7228/' + beer.imagePath;
+
             clone.querySelector('.edit-beer-btn').addEventListener('click', () => {
                 this.openEditModal(beer);
             });
+
+            clone.querySelector('.approve-beer-btn').addEventListener('click', async () => {
+                try {
+                    const updatedBeer = await approveBeer(beer);
+                    
+                    if (updatedBeer) {
+                        // Update the local beerData with the approved beer
+                        const index = this.beerData.findIndex(b => b.id === beer.id);
+                        this.beerData[index].approved = true;
+                        this.renderBeers();
+                    }
+                } catch (error) {
+                    alert("Er ging iets mis bij het goedkeuren: " + error.message);
+                }
+            });
+
             grid.appendChild(clone);
         });
+
+        // Toon een melding als er geen bieren zijn in de huidige filter
+        if (filteredBeers.length === 0) {
+            grid.innerHTML = '<p class="col-span-full text-center py-10 text-gray-400 italic">Geen biertjes gevonden die aan de filter voldoen.</p>';
+        }
     }
 
     openEditModal(beer) {
@@ -64,6 +107,11 @@ export default class extends AbstractView {
     }
 
     setupEventListeners() {
+        const unapprovedToggle = document.getElementById('unapprovedToggle');
+        unapprovedToggle?.addEventListener('change', () => {
+            this.renderBeers(); // Ververs de grid wanneer de toggle verandert
+        });
+
         // Search Modal Elements
         const openBtn = document.getElementById("openSearchBtn");
         const closeBtn = document.getElementById("closeModalBtn");

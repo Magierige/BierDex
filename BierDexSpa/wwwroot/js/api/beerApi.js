@@ -7,6 +7,20 @@
         return beers;
     } catch (error) {
         console.error("Error:", error);
+        throw error;
+    }
+}
+
+export async function getAllBeersAdmin() {
+    try {
+        const response = await fetch("/api/beer/all-admin");
+        if (!response.ok) throw new Error("Could not fetch beers");
+
+        const beers = await response.json();
+        return beers;
+    } catch (error) {
+        console.error("Error:", error);
+        throw error;
     }
 }
 
@@ -19,6 +33,7 @@ export async function getMyBeers() {
         return beers;
     } catch (error) {
         console.error("Error:", error);
+        throw error;
     }
 }
 
@@ -56,6 +71,7 @@ export async function deleteBeer(beerId) {
         return true;
     } catch (error) {
         console.error("Error:", error);
+        throw error;
     }
 }
 
@@ -72,10 +88,29 @@ export async function createBeer(formData) {
             throw new Error(errorText || "Fout bij aanmaken bier");
         }
 
-        return await response.json();
+        return true;
     } catch (error) {
         console.error("API Error:", error);
         throw error;
+    }
+}
+
+export async function approveBeer(beer) {
+    try {
+        const response = await fetch(`/api/beer/approve/${beer.id}`, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json"
+            },
+        });
+
+        if (!response.ok) throw new Error("Could not update beer");
+
+        //const updatedBeer = await response.json();
+        return true;
+    } catch (error) {
+        console.error("Error:", error);
+        throw error
     }
 }
 
