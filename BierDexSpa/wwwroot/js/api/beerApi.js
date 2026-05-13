@@ -58,6 +58,26 @@ export async function deleteBeer(beerId) {
     }
 }
 
+export async function createBeer(formData) {
+    try {
+        const response = await fetch("/api/beer/upload-beer", {
+            method: "POST",
+            // Geen headers nodig, de browser zet automatisch 'multipart/form-data'
+            body: formData
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(errorText || "Fout bij aanmaken bier");
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error("API Error:", error);
+        throw error;
+    }
+}
+
 export function getRandomBeerRating() {
     // Math.random() * 9 gives 0 to 9.0
     // + 1 shifts the range to 1.0 to 10.0

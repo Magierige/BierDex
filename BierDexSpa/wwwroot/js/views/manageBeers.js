@@ -1,5 +1,5 @@
 ﻿import AbstractView from "../abstractView.js";
-import { getAllBeers, getMyBeers, getRandomBeerRating, updateBeer, deleteBeer } from "../api/beerApi.js";
+import { getAllBeers, getMyBeers, getRandomBeerRating, updateBeer, deleteBeer, createBeer } from "../api/beerApi.js";
 import { isAdmin } from "../api/authApi.js";
 
 export default class extends AbstractView {
@@ -64,21 +64,34 @@ export default class extends AbstractView {
     }
 
     setupEventListeners() {
+        // Search Modal Elements
         const openBtn = document.getElementById("openSearchBtn");
         const closeBtn = document.getElementById("closeModalBtn");
         const overlay = document.getElementById("modalOverlay");
         const searchBtn = document.getElementById("searchBtn");
         const modal = document.getElementById("searchModal");
 
+        // Edit Modal Elements
         const editModal = document.getElementById("editModal");
         const closeEdit = document.getElementById("closeEditModal");
         const editOverlay = document.getElementById("editModalOverlay");
         const deleteBtn = document.getElementById("deleteBeerBtn");
         const editForm = document.getElementById("editBeerForm");
 
-        // Close listeners
+        // Add Modal Elements
+        const addModal = document.getElementById("addBeerModal");
+        const openAddBtn = document.getElementById("openAddModalBtn");
+        const closeAddBtn = document.getElementById("closeAddModal");
+        const addOverlay = document.getElementById("addModalOverlay");
+        const addForm = document.getElementById("addBeerForm");
+
+        // Open and close listeners
         [closeEdit, editOverlay].forEach(el => {
             el?.addEventListener("click", () => editModal.classList.add("hidden"));
+        });
+        openAddBtn?.addEventListener("click", () => addModal.classList.remove("hidden"));
+        [closeAddBtn, addOverlay].forEach(el => {
+            el?.addEventListener("click", () => addModal.classList.add("hidden"));
         });
 
         // Handle Delete
@@ -138,6 +151,36 @@ export default class extends AbstractView {
                 } catch (error) {
                     alert("Er ging iets mis bij het opslaan: " + error.message);
                 }
+            }
+        });
+
+        addForm?.addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            // Gebruik FormData om zowel tekst als bestanden te versturen
+            const formData = new FormData();
+            formData.append("barcode", document.getElementById("addBarcode").value);
+            formData.append("name", document.getElementById("addName").value);
+            formData.append("type", document.getElementById("addType").value);
+            formData.append("abv", document.getElementById("addAbv").value);
+
+            const imageFile = document.getElementById("addImage").files[0];
+            if (imageFile) {
+                formData.append("image", imageFile); // 'image' moet matchen met je C# record naam
+            }
+
+            try {
+                const newBeer = await createBeer(formData);
+
+                if (newBeer) {
+                    this.beerData.push(newBeer);
+                    this.renderBeers();
+                    addModal.classList.add("hidden");
+                    addForm.reset();
+                    alert("Biertje succesvol toegevoegd!");
+                }
+            } catch (error) {
+                alert("Fout: " + error.message);
             }
         });
 
