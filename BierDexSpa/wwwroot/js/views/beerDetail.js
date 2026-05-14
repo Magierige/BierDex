@@ -1,13 +1,14 @@
 ﻿import AbstractView from "../abstractView.js";
 import { getSingleBeer, getRandomBeerRating } from "../api/beerApi.js";
 import { BeerService } from "../services/beerService.js";
-import { getReviewByBeerId } from "../api/reviewApi.js";
+import { getReviewByBeerId, createReview } from "../api/reviewApi.js";
 
 export default class extends AbstractView {
     constructor(params) {
         super();
         this.setTitle = "bier details"
         this.sku = params.sku;
+        this.currentBeerId = null;
     }
 
     async getHtml() {
@@ -29,6 +30,7 @@ export default class extends AbstractView {
         try {
             const beerResult = await getSingleBeer(this.sku);
             const beer = beerResult[0];
+            this.currentBeerId = beer.id;
 
             // 2. Vul de HTML met de data (gebruik de ID's uit de vorige stap)
             document.getElementById('beer-detail-img').src = BeerService.getImageUrl(beer.imagePath);
@@ -44,13 +46,12 @@ export default class extends AbstractView {
                 document.getElementById('beer-detail-rating').textContent = beer.rating || getRandomBeerRating();;
             }
 
-            const reviews = await getReviewByBeerId(beer.id);
-            console.log(reviews)
-            if (reviews && !Array.isArray(reviews)) {
-                reviews = [reviews];
+            const form = document.getElementById('review-form');
+            if (form) {
+                form.addEventListener('submit', (e) => this.handleReviewSubmit(e));
             }
-            console.log(reviews)
-            this.renderReviews(reviews);
+
+            this.loadReviews();
 
         } catch (error) {
             console.error("Fout bij ophalen bier details:", error);
@@ -62,20 +63,30 @@ export default class extends AbstractView {
             `;
         }
     }
+
+    async loadReviews() {
+        const reviews = await getReviewByBeerId(this.currentBeerId);
+        // Normalize reviews to array if single object returned
+        const reviewsArray = Array.isArray(reviews) ? reviews : (reviews ? [reviews] : []);
+        this.renderReviews(reviewsArray);
+    }
+
     renderReviews(reviews) {
         const container = document.getElementById('reviews-container');
         const emptyState = document.getElementById('no-reviews');
 
         if (!reviews || reviews.length === 0) {
+            container.innerHTML = '';
             emptyState.classList.remove('hidden');
             return;
         }
 
+        emptyState.classList.add('hidden');
         container.innerHTML = reviews.map(review => `
         <div class="bg-white border border-gray-100 p-6 rounded-3xl shadow-sm hover:shadow-md transition-shadow">
             <div class="flex justify-between items-start mb-4">
                 <div>
-                    <p class="font-black text-gray-900">${review.user.userName}</p>
+                    <p class="font-black text-gray-900">${review.user?.userName || 'unknown'}</p>
                 </div>
                 <div class="bg-amber-50 text-amber-600 px-3 py-1 rounded-full text-sm font-bold">
                     ★ ${review.rating}
@@ -84,5 +95,33 @@ export default class extends AbstractView {
             <p class="text-gray-600 italic leading-relaxed">"${review.content}"</p>
         </div>
     `).join('');
+    }
+
+    async handleReviewSubmit(e) {
+        e.preventDefault();
+
+        const submitBtn = e.target.querySelector('button');
+        submitBtn.disabled = true;
+        submitBtn.textContent = "BEZIG...";
+
+        const formData = {
+            content: document.getElementById('review-content').value,
+            rating: parseInt(document.getElementById('review-rating').value),
+            beerId: this.currentBeerId
+        };
+
+        try {
+            const success = await createReview(formData);
+            if (success) {
+                e.target.reset(); // Clear the form
+                await this.loadReviews(); // Reload the list
+                alert("Bedankt voor je review!");
+            }
+        } catch (error) {
+            alert("Er is iets misgegaan: " + error.message);
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.textContent = "REVIEW PLAATSEN";
+        }
     }
 }
