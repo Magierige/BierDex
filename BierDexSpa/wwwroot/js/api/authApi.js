@@ -38,6 +38,10 @@ export async function logout() {
     window.dispatchEvent(
         new CustomEvent("auth-changed", { detail: { isAuthenticated: false } })
     );
+
+    cachedAuthStatus = null;
+
+    window.location.href = "/login";
 }
 
 export async function isAuthenticated() {
