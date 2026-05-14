@@ -1,5 +1,5 @@
 ﻿import AbstractView from "../abstractView.js";
-import { getMyBeers, updateBeer, deleteBeer, createBeer, getAllBeersAdmin, approveBeer } from "../api/beerApi.js";
+import { getMyBeers, updateBeer, deleteBeer, createBeer, getAllBeersAdmin, approveBeer, getRandomBeerRating } from "../api/beerApi.js";
 import { isAdmin } from "../api/authApi.js";
 import { BeerService } from "../services/beerService.js";
 import { ScannerService } from "../services/scannerService.js";
@@ -59,6 +59,12 @@ export default class extends AbstractView {
             clone.querySelector('.beer-type').textContent = beer.type;
             clone.querySelector('.beer-abv').textContent = beer.abv;
             clone.querySelector('.beer-img').src = BeerService.getImageUrl(beer.imagePath);
+            clone.querySelector('.beer-rating').textContent = beer.rating || getRandomBeerRating();
+
+            const detailLink = clone.querySelector('.beer-link');
+            if (detailLink) {
+                detailLink.setAttribute('href', `/beer/${beer.id}`);
+            }
 
             clone.querySelector('.edit-beer-btn').addEventListener('click', () => this.openEditModal(beer));
 

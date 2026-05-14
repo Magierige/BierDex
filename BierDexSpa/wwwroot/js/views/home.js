@@ -1,5 +1,5 @@
 ﻿import AbstractView from "../abstractView.js";
-import { getAllBeers } from "../api/beerApi.js";
+import { getAllBeers, getRandomBeerRating } from "../api/beerApi.js";
 import { BeerService } from "../services/beerService.js";
 import { ScannerService } from "../services/scannerService.js";
 
@@ -39,10 +39,18 @@ export default class extends AbstractView {
         grid.innerHTML = '';
         this.beerData.forEach(beer => {
             const clone = template.content.cloneNode(true);
+
             clone.querySelector('.beer-name').textContent = beer.name;
             clone.querySelector('.beer-type').textContent = beer.type;
             clone.querySelector('.beer-abv').textContent = beer.abv;
             clone.querySelector('.beer-img').src = BeerService.getImageUrl(beer.imagePath);
+            clone.querySelector('.beer-rating').textContent = beer.rating || getRandomBeerRating();
+
+            const detailLink = clone.querySelector('.beer-link');
+            if (detailLink) {
+                detailLink.setAttribute('href', `/beer/${beer.id}`);
+            }
+
             grid.appendChild(clone);
         });
     }
@@ -85,7 +93,14 @@ export default class extends AbstractView {
             document.getElementById("resultImg").src = BeerService.getImageUrl(foundBeer.imagePath);
             document.getElementById("resultName").innerText = foundBeer.name;
             document.getElementById("resultType").innerText = foundBeer.type;
+
+            resultDiv.onclick = () => {
+                // Gebruik je router om te navigeren (vaak via een 'navigateTo' functie)
+                window.location.href = `/beer/${foundBeer.id}`;
+            };
+
             resultDiv.classList.remove("hidden");
+            resultDiv.classList.add("cursor-pointer", "hover:bg-gray-100", "transition-colors");
         } else {
             alert("Bier niet gevonden!");
         }

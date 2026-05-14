@@ -147,5 +147,15 @@ namespace BierDex.Controllers
             if (!result.Success) return Unauthorized(result.Message);
             return Ok(result.Beer);
         }
+        [HttpGet("{id}")]
+        public async Task<ActionResult<Beer>> GetBeerById(int id)
+        {
+            // Use ToListAsync to keep the API responsive and non-blocking
+            var beer = await _context.Beers
+                .Where(b => b.approved == true && b.Id == id)
+                .ToListAsync();
+
+            return Ok(beer);
+        }
     }
 }
