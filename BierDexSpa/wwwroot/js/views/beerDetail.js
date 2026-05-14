@@ -36,6 +36,7 @@ export default class extends AbstractView {
             document.getElementById('beer-detail-name').textContent = beer.name;
             document.getElementById('beer-detail-type').textContent = beer.type;
             document.getElementById('beer-detail-abv').textContent = beer.abv;
+            document.getElementById('beer-detail-barcode').textContent = beer.barcode
 
             // Rating en andere details
             if (document.getElementById('beer-detail-rating')) {
