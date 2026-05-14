@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using System.ComponentModel.DataAnnotations;
+using BierDex.Services;
 
 namespace BierDex.Models
 {
@@ -33,6 +34,8 @@ namespace BierDex.Models
 
         public bool approved { get; set; } = false;
 
+        public string slug { get; set; }
+
         // Navigation property
         public IdentityUser? user { get; set; }
 
@@ -50,6 +53,8 @@ namespace BierDex.Models
             this.abv = abv;
             this.user = user;
             this.userId = user.Id;
+
+            this.slug = BeerService.GenerateSlug(name);
         }
 
         public Beer() { }

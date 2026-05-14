@@ -114,9 +114,9 @@ export async function approveBeer(beer) {
     }
 }
 
-export async function getSingleBeer(id) {
+export async function getSingleBeer(slug) {
     try {
-        const response = await fetch(`/api/beer/${id}`);
+        const response = await fetch(`/api/beer/${slug}`);
         if (!response.ok) throw new Error("Could not fetch beer");
 
         const beer = await response.json();

@@ -1,5 +1,7 @@
 ﻿using BierDex.Data;
 using BierDex.Models;
+using System.Text.RegularExpressions;
+using Microsoft.EntityFrameworkCore;
 
 namespace BierDex.Services
 {
@@ -50,6 +52,7 @@ namespace BierDex.Services
                 return (false, "Je hebt geen toestemming om een bier aan te maken.", null);
 
             newBeer.userId = userId;
+            newBeer.slug = await CreateUniqueSlug(newBeer.name);
             _context.Beers.Add(newBeer);
             await _context.SaveChangesAsync();
             return (true, "Bier succesvol aangemaakt.", newBeer);
@@ -63,6 +66,44 @@ namespace BierDex.Services
             beer.approved = true;
             await _context.SaveChangesAsync();
             return (true, "Bier succesvol goedgekeurd.", beer);
+        }
+
+        public static string GenerateSlug(string phrase)
+        {
+            if (string.IsNullOrEmpty(phrase)) return "";
+
+            string str = phrase.ToLower();
+            // Verwijder ongeldige tekens
+            str = Regex.Replace(str, @"[^a-z0-9\s-]", "");
+            // Zet witruimte om naar enkel streepje
+            str = Regex.Replace(str, @"\s+", " ").Trim();
+            // Spaties naar streepjes
+            str = str.Replace(" ", "-");
+
+            return str;
+        }
+
+        public async Task<string> CreateUniqueSlug(string name)
+        {
+            string slug = GenerateSlug(name);
+            var existingBeers = await _context.Beers
+                .Where(b => b.slug == slug || b.slug.StartsWith(slug + "-"))
+                .Select(b => b.slug)
+                .ToListAsync();
+
+            if (!existingBeers.Contains(slug))
+            {
+                return slug;
+            }
+
+            // Als de slug al bestaat, voeg een nummertje toe
+            int i = 1;
+            while (existingBeers.Contains($"{slug}-{i}"))
+            {
+                i++;
+            }
+
+            return $"{slug}-{i}";
         }
     }
 }

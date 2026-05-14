@@ -63,7 +63,7 @@ export default class extends AbstractView {
 
             const detailLink = clone.querySelector('.beer-link');
             if (detailLink) {
-                detailLink.setAttribute('href', `/beer/${beer.id}`);
+                detailLink.setAttribute('href', `/beer/${beer.slug}`);
             }
 
             clone.querySelector('.edit-beer-btn').addEventListener('click', () => this.openEditModal(beer));
@@ -148,6 +148,13 @@ export default class extends AbstractView {
             document.getElementById("resultName").innerText = foundBeer.name;
             document.getElementById("resultType").innerText = foundBeer.type;
             resultDiv.classList.remove("hidden");
+
+            resultDiv.style.cursor = "pointer";
+            resultDiv.onclick = () => {
+                // Als je een router functie hebt zoals navigateTo('/...') gebruik die, 
+                // anders werkt window.location ook:
+                window.location.href = `/beer/${foundBeer.slug}`;
+            };
         } else {
             alert("Bier niet gevonden!");
             resultDiv.classList.add("hidden");
@@ -177,7 +184,13 @@ export default class extends AbstractView {
     async handleAddSubmit(e) {
         e.preventDefault();
         const formData = new FormData(e.target);
-        console.log(formData)// Haalt automatisch alle velden op
+        const rawAbv = formData.get("abv");
+
+        if (rawAbv) {
+            const formattedAbv = `${parseFloat(rawAbv)}`;
+
+            formData.set("abv", formattedAbv);
+        }
         const newBeer = await createBeer(formData);
         if (newBeer) {
             this.beerData.push(newBeer);

@@ -48,7 +48,7 @@ export default class extends AbstractView {
 
             const detailLink = clone.querySelector('.beer-link');
             if (detailLink) {
-                detailLink.setAttribute('href', `/beer/${beer.id}`);
+                detailLink.setAttribute('href', `/beer/${beer.slug}`);
             }
 
             grid.appendChild(clone);
@@ -96,7 +96,7 @@ export default class extends AbstractView {
 
             resultDiv.onclick = () => {
                 // Gebruik je router om te navigeren (vaak via een 'navigateTo' functie)
-                window.location.href = `/beer/${foundBeer.id}`;
+                window.location.href = `/beer/${foundBeer.slug}`;
             };
 
             resultDiv.classList.remove("hidden");

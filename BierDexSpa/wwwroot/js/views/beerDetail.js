@@ -36,15 +36,10 @@ export default class extends AbstractView {
             document.getElementById('beer-detail-name').textContent = beer.name;
             document.getElementById('beer-detail-type').textContent = beer.type;
             document.getElementById('beer-detail-abv').textContent = beer.abv;
-            document.getElementById('beer-detail-brewery').textContent = beer.brewery;
 
             // Rating en andere details
             if (document.getElementById('beer-detail-rating')) {
                 document.getElementById('beer-detail-rating').textContent = beer.rating || getRandomBeerRating();;
-            }
-
-            if (beer.description) {
-                document.getElementById('beer-detail-description').textContent = beer.description;
             }
 
         } catch (error) {
