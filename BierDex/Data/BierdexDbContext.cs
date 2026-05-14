@@ -13,6 +13,8 @@ namespace BierDex.Data
 
         public DbSet<Beer> Beers { get; set; }
 
+        public DbSet<Review> Reviews { get; set; }
+
         protected override void OnModelCreating(ModelBuilder builder)
         {
             // Belangrijk: Roep altijd base.OnModelCreating aan bij IdentityDbContext!

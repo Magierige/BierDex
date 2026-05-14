@@ -1,6 +1,7 @@
 ﻿import AbstractView from "../abstractView.js";
 import { getSingleBeer, getRandomBeerRating } from "../api/beerApi.js";
 import { BeerService } from "../services/beerService.js";
+import { getReviewByBeerId } from "../api/reviewApi.js";
 
 export default class extends AbstractView {
     constructor(params) {
@@ -43,6 +44,14 @@ export default class extends AbstractView {
                 document.getElementById('beer-detail-rating').textContent = beer.rating || getRandomBeerRating();;
             }
 
+            const reviews = await getReviewByBeerId(beer.id);
+            console.log(reviews)
+            if (reviews && !Array.isArray(reviews)) {
+                reviews = [reviews];
+            }
+            console.log(reviews)
+            this.renderReviews(reviews);
+
         } catch (error) {
             console.error("Fout bij ophalen bier details:", error);
             document.getElementById('app').innerHTML = `
@@ -52,5 +61,28 @@ export default class extends AbstractView {
                 </div>
             `;
         }
+    }
+    renderReviews(reviews) {
+        const container = document.getElementById('reviews-container');
+        const emptyState = document.getElementById('no-reviews');
+
+        if (!reviews || reviews.length === 0) {
+            emptyState.classList.remove('hidden');
+            return;
+        }
+
+        container.innerHTML = reviews.map(review => `
+        <div class="bg-white border border-gray-100 p-6 rounded-3xl shadow-sm hover:shadow-md transition-shadow">
+            <div class="flex justify-between items-start mb-4">
+                <div>
+                    <p class="font-black text-gray-900">${review.user.userName}</p>
+                </div>
+                <div class="bg-amber-50 text-amber-600 px-3 py-1 rounded-full text-sm font-bold">
+                    ★ ${review.rating}
+                </div>
+            </div>
+            <p class="text-gray-600 italic leading-relaxed">"${review.content}"</p>
+        </div>
+    `).join('');
     }
 }
