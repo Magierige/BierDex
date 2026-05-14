@@ -6,8 +6,9 @@ import ResetPassword from './views/resetPassword.js';
 import ManageProfile from './views/manageProfile.js';
 import ManageBeers from './views/manageBeers.js';
 import adminCreateUser from './views/adminCreateUser.js';
+import beerDetails from './views/beerDetail.js';
 
-import { isAuthenticated, isHigherUser } from "./api/authApi.js";
+import { isAuthenticated, isHigherUser, isAdmin } from "./api/authApi.js";
 import { loadNavBar } from "./nav.js";
 
 const navigateTo = url => {
@@ -42,9 +43,10 @@ const routes = [
     { path: "/register", view: Register },
     { path: "/forgot-password", view: forgotPassword },
     { path: "/reset-password", view: ResetPassword },
-    { path: "/manage-profile", view: ManageProfile },
+    { path: "/manage-profile", view: ManageProfile, requiresAuth: true },
     { path: "/manage-beers", view: ManageBeers, requiresHigherUser: true },
-    { path: "/create-user", view: adminCreateUser} 
+    { path: "/create-user", view: adminCreateUser, requiresAdmin: true },
+    { path: "/beer/:sku", view: beerDetails, requiresAuth: true }
 ];
 
 const router = async () => {
@@ -82,6 +84,15 @@ const router = async () => {
     if (match.requiresHigherUser) {
         const higherUser = await isHigherUser();
         if (!higherUser) {
+            // redirect to /home when user is not authorized
+            navigateTo("/home");
+            return; // exit router to prevent further execution
+        }
+    }
+
+    if (match.requiresAdmin) {
+        const adminUser = await isAdmin();
+        if (!adminUser) {
             // redirect to /home when user is not authorized
             navigateTo("/home");
             return; // exit router to prevent further execution

@@ -114,6 +114,19 @@ export async function approveBeer(beer) {
     }
 }
 
+export async function getSingleBeer(slug) {
+    try {
+        const response = await fetch(`/api/beer/${slug}`);
+        if (!response.ok) throw new Error("Could not fetch beer");
+
+        const beer = await response.json();
+        return beer;
+    } catch (error) {
+        console.error("Error:", error);
+        throw error;
+    }
+}
+
 export function getRandomBeerRating() {
     // Math.random() * 9 gives 0 to 9.0
     // + 1 shifts the range to 1.0 to 10.0

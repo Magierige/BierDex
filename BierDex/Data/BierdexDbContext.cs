@@ -13,10 +13,21 @@ namespace BierDex.Data
 
         public DbSet<Beer> Beers { get; set; }
 
-       
+        protected override void OnModelCreating(ModelBuilder builder)
+        {
+            // Belangrijk: Roep altijd base.OnModelCreating aan bij IdentityDbContext!
+            base.OnModelCreating(builder);
+
+            // Configureer de Slug kolom
+            builder.Entity<Beer>()
+                .HasIndex(b => b.slug)
+                .IsUnique();
+
+            // Optioneel: Je kunt hier ook extra beperkingen toevoegen
+            builder.Entity<Beer>()
+                .Property(b => b.slug)
+                .IsRequired()
+                .HasMaxLength(150);
+        }
     }
 }
-
-
-
-

@@ -1,5 +1,5 @@
 ﻿import AbstractView from "../abstractView.js";
-import { getMyBeers, updateBeer, deleteBeer, createBeer, getAllBeersAdmin, approveBeer } from "../api/beerApi.js";
+import { getMyBeers, updateBeer, deleteBeer, createBeer, getAllBeersAdmin, approveBeer, getRandomBeerRating } from "../api/beerApi.js";
 import { isAdmin } from "../api/authApi.js";
 import { BeerService } from "../services/beerService.js";
 import { ScannerService } from "../services/scannerService.js";
@@ -59,6 +59,12 @@ export default class extends AbstractView {
             clone.querySelector('.beer-type').textContent = beer.type;
             clone.querySelector('.beer-abv').textContent = beer.abv;
             clone.querySelector('.beer-img').src = BeerService.getImageUrl(beer.imagePath);
+            clone.querySelector('.beer-rating').textContent = beer.rating || getRandomBeerRating();
+
+            const detailLink = clone.querySelector('.beer-link');
+            if (detailLink) {
+                detailLink.setAttribute('href', `/beer/${beer.slug}`);
+            }
 
             clone.querySelector('.edit-beer-btn').addEventListener('click', () => this.openEditModal(beer));
 
@@ -142,6 +148,13 @@ export default class extends AbstractView {
             document.getElementById("resultName").innerText = foundBeer.name;
             document.getElementById("resultType").innerText = foundBeer.type;
             resultDiv.classList.remove("hidden");
+
+            resultDiv.style.cursor = "pointer";
+            resultDiv.onclick = () => {
+                // Als je een router functie hebt zoals navigateTo('/...') gebruik die, 
+                // anders werkt window.location ook:
+                window.location.href = `/beer/${foundBeer.slug}`;
+            };
         } else {
             alert("Bier niet gevonden!");
             resultDiv.classList.add("hidden");
@@ -171,7 +184,13 @@ export default class extends AbstractView {
     async handleAddSubmit(e) {
         e.preventDefault();
         const formData = new FormData(e.target);
-        console.log(formData)// Haalt automatisch alle velden op
+        const rawAbv = formData.get("abv");
+
+        if (rawAbv) {
+            const formattedAbv = `${parseFloat(rawAbv)}`;
+
+            formData.set("abv", formattedAbv);
+        }
         const newBeer = await createBeer(formData);
         if (newBeer) {
             this.beerData.push(newBeer);

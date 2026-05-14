@@ -11,7 +11,7 @@ using System.Security.Claims;
 
 namespace BierDex.Controllers
 {
-    public record BeerCreateRequest(string barcode, string name, string type, double abv, IFormFile image);
+    public record BeerCreateRequest(string barcode, string name, string type, string abv, IFormFile image);
 
     [ApiController]
     [Route("api/beer")]
@@ -146,6 +146,16 @@ namespace BierDex.Controllers
 
             if (!result.Success) return Unauthorized(result.Message);
             return Ok(result.Beer);
+        }
+        [HttpGet("{slug}")]
+        public async Task<ActionResult<Beer>> GetBeerBySlug(string slug)
+        {
+            // Use ToListAsync to keep the API responsive and non-blocking
+            var beer = await _context.Beers
+                .Where(b => b.approved == true && b.slug == slug)
+                .ToListAsync();
+
+            return Ok(beer);
         }
     }
 }

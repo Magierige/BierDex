@@ -1,4 +1,7 @@
-﻿export async function login(email, password) {
+﻿let cachedAuthStatus = null; // Slaat het volledige JSON object van /api/auth/status op
+let authPromise = null;
+
+export async function login(email, password) {
     const response = await fetch("/api/auth/email-login?useCookies=true&useSessionCookies=true", {
         method: "POST",
         headers: {
@@ -38,25 +41,23 @@ export async function logout() {
 }
 
 export async function isAuthenticated() {
-    const response = await fetch("/api/auth/status", {
-        method: "GET",
-        credentials: "include"
-    });
-    return response.status === 200;
+    const status = await getAuthStatus();
+
+    if (!status || !status.isAuthenticated) {
+        return false;
+    }
+
+    return status.isAuthenticated;
 }
 
 export async function getUsername() {
-    const response = await fetch("/api/auth/status", {
-        method: "GET",
-        credentials: "include"
-    });
+    const status = await getAuthStatus();
 
-    if (!response.ok) {
-        return null;
+    if (!status || !status.name) {
+        return false;
     }
 
-    const data = await response.json();
-    return data.name;
+    return status.name;
 }
 
 export async function register(email, password) {
@@ -154,73 +155,61 @@ export async function changeUsername(newUsername) {
     }
 }
 
-export async function isAdmin() {
-    const response = await fetch("/api/auth/status", {
+async function getAuthStatus() {
+    if (cachedAuthStatus) {
+        return cachedAuthStatus;
+    }
+
+    if (authPromise) {
+        return authPromise;
+    }
+
+    authPromise = fetch("/api/auth/status", {
         method: "GET",
         credentials: "include"
+    }).then(async (response) => {
+        if (response.status !== 200) {
+            cachedAuthStatus = null;
+            return null;
+        }
+        cachedAuthStatus = await response.json();
+        return cachedAuthStatus;
+    }).finally(() => {
+        // Maak de promise leeg zodra deze klaar is (de data zit nu in cachedAuthStatus)
+        authPromise = null;
     });
-    if (response.status != 200) {
-        console.log("geen 200 error");
+
+    return authPromise;
+}
+
+export async function isAdmin() {
+    const status = await getAuthStatus();
+
+    if (!status || !status.roles) {
         return false;
     }
-    let jroles = await response.json();
-    if (jroles.roles == null) {
-        console.log("no roll");
-        return false
-    }
-    let roles = jroles.roles;
-    if (roles.includes("Admin")) {
-        console.log("isadmin");
-        return true
-    }
-    console.log("laatste stap no admin")
-    return false
+
+    return status.roles.includes("Admin");
 } 
 
 export async function isSupplier() {
-    const response = await fetch("/api/auth/status", {
-        method: "GET",
-        credentials: "include"
-    });
-    if (response.status != 200) {
-        console.log("geen 200 error");
+    const status = await getAuthStatus();
+
+    if (!status || !status.roles) {
         return false;
     }
-    let jroles = await response.json();
-    if (jroles.roles == null) {
-        console.log("no roll");
-        return false
-    }
-    let roles = jroles.roles;
-    if (roles.includes("Supplier")) {
-        console.log("issupplier");
-        return true
-    }
-    console.log("laatste stap no supplier")
-    return false
+
+    return status.roles.includes("Supplier");
 } 
 
 export async function isHigherUser() {
-    const response = await fetch("/api/auth/status", {
-        method: "GET",
-        credentials: "include"
-    });
-    if (response.status != 200) {
-        console.log("geen 200 error");
+    const status = await getAuthStatus();
+
+    if (!status || !status.roles) {
         return false;
     }
-    let jroles = await response.json();
-    if (jroles.roles == null) {
-        console.log("no roll");
-        return false
-    }
-    let roles = jroles.roles;
-    if (roles.includes("Supplier") || roles.includes("Admin")) {
-        console.log("issupplier or isadmin");
-        return true
-    }
-    console.log("laatste stap no supplier or admin")
-    return false
+
+    return status.roles.includes("Admin") || status.roles.includes("Supplier");
 } 
 
 export async function createUser(email, username, role) {
