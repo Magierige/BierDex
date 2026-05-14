@@ -60,6 +60,16 @@ export async function getUsername() {
     return status.name;
 }
 
+export async function getUserId() {
+    const status = await getAuthStatus();
+
+    if (!status || !status.userid) {
+        return false;
+    }
+
+    return status.userid;
+}
+
 export async function register(email, password) {
     const response = await fetch("/api/auth/register", {
         method: "POST",

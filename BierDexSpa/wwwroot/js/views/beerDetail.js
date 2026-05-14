@@ -2,6 +2,7 @@
 import { getSingleBeer, getRandomBeerRating } from "../api/beerApi.js";
 import { BeerService } from "../services/beerService.js";
 import { getReviewByBeerId, createReview } from "../api/reviewApi.js";
+import { isAdmin, getUserId } from "../api/authApi.js";
 
 export default class extends AbstractView {
     constructor(params) {
@@ -9,6 +10,8 @@ export default class extends AbstractView {
         this.setTitle = "bier details"
         this.sku = params.sku;
         this.currentBeerId = null;
+        this.isAdmin = false;
+        this.userId = null;
     }
 
     async getHtml() {
@@ -25,6 +28,8 @@ export default class extends AbstractView {
     }
 
     async init() {
+        this.isAdmin = await isAdmin();
+        this.userId = await getUserId();
         if (!this.sku) return;
 
         try {
@@ -82,19 +87,36 @@ export default class extends AbstractView {
         }
 
         emptyState.classList.add('hidden');
-        container.innerHTML = reviews.map(review => `
-        <div class="bg-white border border-gray-100 p-6 rounded-3xl shadow-sm hover:shadow-md transition-shadow">
+        container.innerHTML = reviews.map(review => {
+            // Logic check: Is the user an admin OR the owner of this review?
+            const canDelete = this.isAdmin || this.userId === review.user.id;
+
+            return `
+        <div class="bg-white border border-gray-100 p-6 rounded-3xl shadow-sm hover:shadow-md transition-shadow relative">
             <div class="flex justify-between items-start mb-4">
                 <div>
                     <p class="font-black text-gray-900">${review.user?.userName || 'unknown'}</p>
                 </div>
-                <div class="bg-amber-50 text-amber-600 px-3 py-1 rounded-full text-sm font-bold">
-                    ★ ${review.rating}
+                <div class="flex items-center gap-2">
+                    <div class="bg-amber-50 text-amber-600 px-3 py-1 rounded-full text-sm font-bold">
+                        ★ ${review.rating}
+                    </div>
+                    
+                    ${canDelete ? `
+                        <button 
+                            data-review-id="${review.id}" 
+                            class="delete-review-btn text-gray-300 hover:text-red-600 transition-colors p-1"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                        </button>
+                    ` : ''}
                 </div>
             </div>
             <p class="text-gray-600 italic leading-relaxed">"${review.content}"</p>
         </div>
-    `).join('');
+    `}).join('');
     }
 
     async handleReviewSubmit(e) {
