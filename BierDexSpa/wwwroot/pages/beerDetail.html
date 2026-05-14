@@ -35,5 +35,42 @@
                 <p class="text-xl text-gray-500 mt-2 font-medium">Barcode: <span id="beer-detail-barcode"></span></p>
             </div>
         </div>
-    </div> 
+    </div>
+    <!-- Add this after the closing </div> of your Content Section -->
+    <div class="mt-16 border-t border-gray-100 pt-12">
+        <h2 class="text-3xl font-black text-gray-900 mb-8 uppercase tracking-tighter">Reviews</h2>
+
+        <div class="mt-12 bg-gray-50 p-8 rounded-[2rem] border border-gray-100">
+            <h3 class="text-2xl font-black text-gray-900 mb-6 uppercase tracking-tighter">Schrijf een review</h3>
+            <form id="review-form" class="space-y-4">
+                <div class="flex flex-col gap-2">
+                    <label for="review-rating" class="text-sm font-bold text-gray-600 uppercase">Rating</label>
+                    <select id="review-rating" name="rating" class="w-full md:w-32 p-3 rounded-xl border-none ring-1 ring-gray-200 focus:ring-2 focus:ring-amber-500 outline-none font-bold">
+                        <option value="5">★ 5</option>
+                        <option value="4">★ 4</option>
+                        <option value="3">★ 3</option>
+                        <option value="2">★ 2</option>
+                        <option value="1">★ 1</option>
+                    </select>
+                </div>
+                <div class="flex flex-col gap-2">
+                    <label for="review-content" class="text-sm font-bold text-gray-600 uppercase">Jouw ervaring</label>
+                    <textarea id="review-content" name="content" rows="3" class="w-full p-4 rounded-2xl border-none ring-1 ring-gray-200 focus:ring-2 focus:ring-amber-500 outline-none" placeholder="Wat vond je van dit biertje?"></textarea>
+                </div>
+                <button type="submit" class="bg-amber-500 hover:bg-amber-600 text-white font-black py-4 px-8 rounded-2xl transition-all active:scale-95">
+                    POST REVIEW
+                </button>
+            </form>
+        </div>
+
+        <!-- Reviews Container -->
+        <div id="reviews-container" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Review cards will be injected here -->
+        </div>
+
+        <!-- Empty State (Hidden by default) -->
+        <div id="no-reviews" class="hidden text-center py-12 bg-gray-50 rounded-3xl">
+            <p class="text-gray-500 font-medium">Nog geen reviews voor dit bier.</p>
+        </div>
+    </div>
 </main>

@@ -2,7 +2,6 @@
 using BierDex.Data;
 using BierDex.Models;
 using BierDex.Services;
-using BierDex.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;

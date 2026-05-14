@@ -53,7 +53,8 @@ namespace API.Controllers
             {
                 isAuthenticated = true,
                 name = user.UserName,
-                roles = roles
+                roles = roles,
+                userid = user.Id
             });
         }
 

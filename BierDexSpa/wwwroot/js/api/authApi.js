@@ -38,6 +38,10 @@ export async function logout() {
     window.dispatchEvent(
         new CustomEvent("auth-changed", { detail: { isAuthenticated: false } })
     );
+
+    cachedAuthStatus = null;
+
+    window.location.href = "/login";
 }
 
 export async function isAuthenticated() {
@@ -58,6 +62,16 @@ export async function getUsername() {
     }
 
     return status.name;
+}
+
+export async function getUserId() {
+    const status = await getAuthStatus();
+
+    if (!status || !status.userid) {
+        return false;
+    }
+
+    return status.userid;
 }
 
 export async function register(email, password) {
