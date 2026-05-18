@@ -25,11 +25,12 @@ jobs:
     - name: Build Solution
       run: dotnet build --configuration Release --no-restore
 
-    # CRUCIAL: Installeer de benodigde browsers voor je Playwright UI-tests
+    # Installeer de Playwright browsers via het specifieke testproject
     - name: Install Playwright Browsers
       run: |
+        dotnet build BierDexTestProject/BierDexTestProject.csproj
         dotnet tool install --global Microsoft.Playwright.CLI || true
-        playwright install --with-deps
+        playwright install --with-deps --project BierDexTestProject
 
     - name: Run Tests
       run: dotnet test --configuration Release --no-build --verbosity normal
