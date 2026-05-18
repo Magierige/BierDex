@@ -26,8 +26,8 @@ jobs:
     - name: Build Solution
       run: dotnet build --configuration Release --no-restore
 
-    # Maak een lokale tool manifest aan en installeer de exacte Playwright CLI die bij jouw NuGet pakket hoort
     - name: Install Playwright CLI & Browser
+      working-directory: BierDexTestProject
       run: |
         dotnet new tool-manifest --force
         dotnet tool install Microsoft.Playwright.CLI
