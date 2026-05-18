@@ -27,7 +27,7 @@ builder.Services
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddSingleton<IEmailSender, SmtpControler>();
+builder.Services.AddSingleton<IEmailSender, SmtpController>();
 
 builder.Services.AddControllers();
 
