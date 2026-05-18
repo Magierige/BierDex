@@ -3,6 +3,7 @@ using System;
 using BierDex.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace BierDex.Migrations
 {
     [DbContext(typeof(BierdexDBContext))]
-    partial class BierdexDBContextModelSnapshot : ModelSnapshot
+    [Migration("20260512132353_beerAprovel")]
+    partial class beerAprovel
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -37,9 +40,8 @@ namespace BierDex.Migrations
                     b.Property<bool>("approved")
                         .HasColumnType("boolean");
 
-                    b.Property<string>("barcode")
-                        .IsRequired()
-                        .HasColumnType("text");
+                    b.Property<int>("barcode")
+                        .HasColumnType("integer");
 
                     b.Property<string>("imagePath")
                         .IsRequired()
@@ -49,11 +51,6 @@ namespace BierDex.Migrations
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
-
-                    b.Property<string>("slug")
-                        .IsRequired()
-                        .HasMaxLength(150)
-                        .HasColumnType("character varying(150)");
 
                     b.Property<string>("type")
                         .IsRequired()
@@ -65,47 +62,9 @@ namespace BierDex.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("slug")
-                        .IsUnique();
-
                     b.HasIndex("userId");
 
                     b.ToTable("Beers");
-                });
-
-            modelBuilder.Entity("BierDex.Models.Review", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("BeerId")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("Content")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<int>("Rating")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Username")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("BeerId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("Reviews");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -313,25 +272,6 @@ namespace BierDex.Migrations
                         .IsRequired();
 
                     b.Navigation("user");
-                });
-
-            modelBuilder.Entity("BierDex.Models.Review", b =>
-                {
-                    b.HasOne("BierDex.Models.Beer", "Beer")
-                        .WithMany()
-                        .HasForeignKey("BeerId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Beer");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

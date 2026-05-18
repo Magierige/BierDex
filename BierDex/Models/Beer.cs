@@ -1,23 +1,51 @@
 ﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using System.ComponentModel.DataAnnotations.Schema;
-
+using System.ComponentModel.DataAnnotations;
+using BierDex.Services;
 
 namespace BierDex.Models
 {
     public class Beer
     {
+        [Key]
         public int Id { get; set; }
-        public int barcode { get; set; }
+
+        [Required(ErrorMessage = "Barcode is verplicht")]
+        [RegularExpression(@"^\d{8,13}$", ErrorMessage = "Ongeldig formaat. Gebruik een geldige barcode van 8 tot 13 cijfers.")]
+        public string barcode { get; set; }
+
+        [Required(ErrorMessage = "Naam is verplicht")]
+        [StringLength(100, MinimumLength = 2, ErrorMessage = "Naam moet tussen 2 en 100 tekens zijn")]
         public string name { get; set; }
+
+        [Required(ErrorMessage = "Type is verplicht")]
         public string type { get; set; }
+
+        [Required(ErrorMessage = "Afbeelding pad is verplicht")]
         public string imagePath { get; set; }
-        public string abv {  get; set; }
-        public IdentityUser user { get; set; }
+
+        /// <summary>
+        /// Validates: 0-100, optional 1 decimal, ends with %
+        /// Examples: "5%", "5.5%", "100%", "0.1%"
+        /// </summary>
+        [Required(ErrorMessage = "Alcoholpercentage is verplicht")]
+        [RegularExpression(@"^(100(\.0)?|([0-9]{1,2})(\.[0-9])?)%$",
+            ErrorMessage = "Ongeldig formaat. Gebruik bijv. '5%', '5.5%' of '100%'")]
+        public string abv { get; set; }
+
+        public bool approved { get; set; } = false;
+
+        public string slug { get; set; }
+
+        // Navigation property
+        public IdentityUser? user { get; set; }
+
+        // Foreign Key
+        [Required]
         public string userId { get; set; }
-        public Beer(int id, int barcode, string name, string type, string imagePath, string abv, IdentityUser user)
+
+        // Constructor
+        public Beer(string barcode, string name, string type, string imagePath, string abv, IdentityUser user)
         {
-            this.Id = id;
             this.barcode = barcode;
             this.name = name;
             this.type = type;
@@ -25,8 +53,10 @@ namespace BierDex.Models
             this.abv = abv;
             this.user = user;
             this.userId = user.Id;
-        }
-        public Beer() { }
 
+            this.slug = BeerService.GenerateSlug(name);
+        }
+
+        public Beer() { }
     }
 }

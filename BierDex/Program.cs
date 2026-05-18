@@ -1,8 +1,9 @@
+using BierDex.Controllers;
 using BierDex.Data;
+using BierDex.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
-using BierDex.Controllers;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,12 +21,13 @@ builder.Services
         options.User.RequireUniqueEmail = true;
     })
     .AddRoles<IdentityRole>()
-    .AddEntityFrameworkStores<BierdexDBContext>();
+    .AddEntityFrameworkStores<BierdexDBContext>()
+    .AddUserStore<MyUserStore>();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddSingleton<IEmailSender, SmtpControler>();
+builder.Services.AddSingleton<IEmailSender, SmtpController>();
 
 builder.Services.AddControllers();
 
@@ -39,7 +41,13 @@ builder.Services.AddCors(options =>
     });
 });
 
+builder.Services.AddScoped<BeerService>();
+builder.Services.AddScoped<ImageService>();
+
 var app = builder.Build();
+
+app.UseDefaultFiles();
+app.UseStaticFiles();
 
 app.UseCors();
 
@@ -81,3 +89,5 @@ var authGroup = app.MapGroup("/api/auth");
 authGroup.MapIdentityApi<IdentityUser>();
 
 app.Run();
+
+public partial class Program { }

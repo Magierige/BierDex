@@ -22,6 +22,7 @@ namespace BierDex.Data
             // 2. Create users
             await CreateUser(userManager, "admin", "admin@test.com", "Password123!", "Admin");
             await CreateUser(userManager, "supplier", "supplier@test.com", "Password123!", "Supplier");
+            await CreateUser(userManager, "supplier2", "supplier2@test.com", "Password123!", "Supplier");
             await CreateUser(userManager, "user", "user@test.com", "Password123!", "User");
         }
 

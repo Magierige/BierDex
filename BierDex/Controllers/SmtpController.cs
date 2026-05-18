@@ -6,10 +6,10 @@ using System.Net.Mail;
 
 namespace BierDex.Controllers
 {
-    public class SmtpControler : IEmailSender
+    public class SmtpController : IEmailSender
     {
         private readonly IConfiguration _config;
-        public SmtpControler(IConfiguration config)
+        public SmtpController(IConfiguration config)
         {
             _config = config;
         }
