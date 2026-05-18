@@ -27,7 +27,7 @@ builder.Services
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddSingleton<IEmailSender, SmtpControler>();
+builder.Services.AddSingleton<IEmailSender, SmtpController>();
 
 builder.Services.AddControllers();
 
@@ -89,3 +89,5 @@ var authGroup = app.MapGroup("/api/auth");
 authGroup.MapIdentityApi<IdentityUser>();
 
 app.Run();
+
+public partial class Program { }
