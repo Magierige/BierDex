@@ -9,6 +9,8 @@ on:
 
 jobs:
   build-and-test:
+    timeout-minutes: 60
+    
     runs-on: ubuntu-latest
 
     steps:
@@ -27,10 +29,14 @@ jobs:
 
     # Installeer de Playwright browsers via het specifieke testproject
     - name: Install Playwright Browsers
-      run: |
-        dotnet build BierDexTestProject/BierDexTestProject.csproj
-        dotnet tool install --global Microsoft.Playwright.CLI || true
-        playwright install --with-deps --project BierDexTestProject
-        
+      run: npx playwright install --with-deps
+
     - name: Run Tests
       run: dotnet test --configuration Release --no-build --verbosity normal
+
+    - uses: actions/upload-artifact@v4
+      if: ${{ !cancelled() }}
+      with:
+        name: playwright-report
+        path: playwright-report/
+        retention-days: 30
