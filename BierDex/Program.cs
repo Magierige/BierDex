@@ -89,3 +89,5 @@ var authGroup = app.MapGroup("/api/auth");
 authGroup.MapIdentityApi<IdentityUser>();
 
 app.Run();
+
+public partial class Program { }

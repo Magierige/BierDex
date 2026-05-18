@@ -1,4 +1,5 @@
 <Solution>
   <Project Path="BierDex/BierDex.csproj" />
   <Project Path="BierDexSpa/BierDexSpa.csproj" Id="30e1bb1a-cab1-4b83-8545-34a71c6a6821" />
+  <Project Path="BierDexTestProject/BierDexTestProject.csproj" Id="022f76a5-8935-40be-8290-c186a9222224" />
 </Solution>
