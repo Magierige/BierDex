@@ -10,7 +10,6 @@ on:
 jobs:
   build-and-test:
     timeout-minutes: 60
-    
     runs-on: ubuntu-latest
 
     steps:
@@ -27,16 +26,18 @@ jobs:
     - name: Build Solution
       run: dotnet build --configuration Release --no-restore
 
-    # Installeer de Playwright browsers via het specifieke testproject
+    # Gecorrigeerd: Installeer browsers via de gebouwde .NET Playwright DLL
     - name: Install Playwright Browsers
-      run: npx playwright install --with-deps
+      run: |
+        dotnet exec BierDexTestProject/bin/Release/net10.0/Microsoft.Playwright.dll install --with-deps
 
     - name: Run Tests
       run: dotnet test --configuration Release --no-build --verbosity normal
 
+    # Optioneel: Playwright bewaart traces vaak in de bin/ map bij .NET, pas dit aan indien nodig
     - uses: actions/upload-artifact@v4
       if: ${{ !cancelled() }}
       with:
         name: playwright-report
-        path: playwright-report/
+        path: BierDexTestProject/bin/Release/net10.0/playwright-report/
         retention-days: 30
