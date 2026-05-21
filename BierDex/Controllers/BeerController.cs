@@ -6,11 +6,30 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
 
 namespace BierDex.Controllers
 {
-    public record BeerCreateRequest(string barcode, string name, string type, string abv, IFormFile image);
+    public record BeerCreateRequest(
+        [Required(ErrorMessage = "Barcode is verplicht")]
+        [RegularExpression(@"^\d{8,13}$", ErrorMessage = "Ongeldig formaat. Gebruik een geldige barcode van 8 tot 13 cijfers.")]
+        string barcode,
+
+        [Required(ErrorMessage = "Naam is verplicht")]
+        [StringLength(100, MinimumLength = 2, ErrorMessage = "Naam moet tussen 2 en 100 tekens zijn")]
+        string name,
+
+        [Required(ErrorMessage = "Type is verplicht")]
+        string type,
+
+        [Required(ErrorMessage = "Alcoholpercentage is verplicht")]
+        [RegularExpression(@"^(100(\.0)?|([0-9]{1,2})(\.[0-9])?)%$", ErrorMessage = "Ongeldig formaat. Gebruik bijv. '5%', '5.5%' of '100%'")]
+        string abv,
+
+        [Required(ErrorMessage = "Afbeelding is verplicht")]
+        IFormFile image
+    );
 
     [ApiController]
     [Route("api/beer")]

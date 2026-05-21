@@ -6,12 +6,24 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
 
 
 namespace BierDex.Controllers
 {
-    public record ReviewCreateRequest(string Content, int Rating, int BeerId);
+    public record ReviewCreateRequest(
+        [Required(ErrorMessage = "Review mag niet leeg zijn.")]
+        [StringLength(1000, MinimumLength = 5, ErrorMessage = "De review moet tussen de 5 en 1000 tekens lang zijn.")]
+        string Content,
+
+        [Required]
+        [Range(1, 5, ErrorMessage = "Rating moet tussen 1 en 5 sterren liggen.")]
+        int Rating,
+
+        [Required]
+        int BeerId
+    );
 
     [ApiController]
     [Route("api/review")]
@@ -78,6 +90,38 @@ namespace BierDex.Controllers
             await _context.SaveChangesAsync();
 
             return CreatedAtAction(nameof(GetReviewByBeerId), new { id = review.BeerId }, review);
+        }
+
+        [HttpDelete("delete/{id}")]
+        [Authorize]
+        public async Task<IActionResult> DeleteReview(int id)
+        {
+            // Haal de huidige ingelogde User ID op uit de claims
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId)) return Unauthorized("Gebruiker is niet geautoriseerd.");
+
+            // Zoek de review op inclusief de User data om de eigenaar te controleren
+            var review = await _context.Reviews
+                .Include(r => r.User)
+                .FirstOrDefaultAsync(r => r.Id == id);
+
+            if (review == null) return NotFound("Review niet gevonden.");
+
+            // Check de rechten: Is de gebruiker een Admin OF de eigenaar van de review?
+            var isAdmin = User.IsInRole("Admin");
+            var isOwner = review.UserId == userId || (review.User != null && review.User.Id == userId);
+
+            if (!isAdmin && !isOwner)
+            {
+                return Forbid("Je bent niet de eigenaar van deze review en geen admin.");
+            }
+
+            // Verwijder de review en sla de wijzigingen op
+            _context.Reviews.Remove(review);
+            await _context.SaveChangesAsync();
+
+            // 204 No Content is de standaard succesvolle HTTP statuscode voor een DELETE actie
+            return NoContent();
         }
     }
 }
