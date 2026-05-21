@@ -47,13 +47,17 @@ export async function updateBeer(beer) {
             body: JSON.stringify(beer)
         });
 
-        if (!response.ok) throw new Error("Could not update beer");
+        if (!response.ok) {
+            // Haal de ÉCHTE serverfout (tekst of validatie-JSON) op
+            const errorText = await response.text();
+            throw new Error(errorText || "Could not update beer");
+        }
 
         const updatedBeer = await response.json();
         return updatedBeer;
     } catch (error) {
         console.error("Error:", error);
-        throw error
+        throw error;
     }
 }
 
