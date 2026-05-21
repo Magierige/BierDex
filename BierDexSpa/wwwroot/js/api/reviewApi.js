@@ -45,3 +45,17 @@ export async function getReviewByBeerId(beerId) {
         throw error;
     }
 }
+
+export async function deleteReview(reviewId) {
+    try {
+        const response = await fetch(`/api/review/delete/${reviewId}`, {
+            method: "DELETE"
+        });
+        if (!response.ok) throw new Error("Could not delete review");
+
+        return true;
+    } catch (error) {
+        console.error("API Error:", error);
+        throw error;
+    }
+}
