@@ -1,7 +1,7 @@
 ﻿import AbstractView from "../abstractView.js";
 import { getSingleBeer, getRandomBeerRating } from "../api/beerApi.js";
 import { BeerService } from "../services/beerService.js";
-import { getReviewByBeerId, createReview } from "../api/reviewApi.js";
+import { getReviewByBeerId, createReview, deleteReview } from "../api/reviewApi.js";
 import { isAdmin, getUserId } from "../api/authApi.js";
 
 export default class extends AbstractView {
@@ -88,7 +88,6 @@ export default class extends AbstractView {
 
         emptyState.classList.add('hidden');
         container.innerHTML = reviews.map(review => {
-            // Logic check: Is the user an admin OR the owner of this review?
             const canDelete = this.isAdmin || this.userId === review.user.id;
 
             return `
@@ -107,7 +106,7 @@ export default class extends AbstractView {
                             data-review-id="${review.id}" 
                             class="delete-review-btn text-gray-300 hover:text-red-600 transition-colors p-1"
                         >
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                             </svg>
                         </button>
@@ -117,6 +116,13 @@ export default class extends AbstractView {
             <p class="text-gray-600 italic leading-relaxed">"${review.content}"</p>
         </div>
     `}).join('');
+
+        // --- ENERGIEKE EVENT LISTENERS TOEVOEGEN ---
+        // We zoeken alle verwijder-knoppen op die we net in de HTML hebben gezet
+        const deleteButtons = container.querySelectorAll('.delete-review-btn');
+        deleteButtons.forEach(button => {
+            button.addEventListener('click', (e) => this.handleReviewDelete(e));
+        });
     }
 
     async handleReviewSubmit(e) {
@@ -132,18 +138,76 @@ export default class extends AbstractView {
             beerId: this.currentBeerId
         };
 
+        const errorEl = document.getElementById('create-review-error');
+        if (errorEl) {
+            errorEl.textContent = "";
+        }
+
         try {
             const success = await createReview(formData);
             if (success) {
-                e.target.reset(); // Clear the form
-                await this.loadReviews(); // Reload the list
+                e.target.reset();
+                await this.loadReviews();
                 alert("Bedankt voor je review!");
             }
         } catch (error) {
-            alert("Er is iets misgegaan: " + error.message);
+            let errorMessage = error.message;
+
+            // --- DE ULTIEME JSON CRUSHER ---
+            // Als de error-tekst (of de JSON-brij) begint met een accolade, slopen we hem hier live uit elkaar!
+            if (errorMessage && errorMessage.trim().startsWith("{")) {
+                try {
+                    const parsedJson = JSON.parse(errorMessage);
+                    if (parsedJson.errors) {
+                        // Pak alle meldingen samen en zet ze onder elkaar
+                        errorMessage = Object.values(parsedJson.errors).flat().join("\n");
+                    } else if (parsedJson.title) {
+                        errorMessage = parsedJson.title;
+                    }
+                } catch (p) {
+                    // Mocht het parsen mislukken, behouden we de originele tekst
+                }
+            }
+
+            // Als de boodschap na het filteren nog steeds leeg is, tonen we een standaardtekst
+            if (!errorMessage || errorMessage.trim() === "") {
+                errorMessage = "Er is iets misgegaan bij het plaatsen van de review.";
+            }
+
+            if (errorEl) {
+                errorEl.textContent = errorMessage;
+                errorEl.style.color = "#dc3545"; // Rood
+            } else {
+                alert(errorMessage);
+            }
         } finally {
             submitBtn.disabled = false;
             submitBtn.textContent = "REVIEW PLAATSEN";
+        }
+    }
+
+    async handleReviewDelete(e) {
+        // Haal het ID van de review op uit het data-attribuut van de knop
+        const reviewId = e.target.getAttribute('data-review-id');
+
+        // Vraag om een bevestiging, wel zo netjes voor de gebruiker
+        if (!confirm("Weet je zeker dat je deze review wilt verwijderen?")) {
+            return;
+        }
+
+        try {
+            // Roep de API aan om te deleten
+            const success = await deleteReview(reviewId);
+
+            if (success) {
+                // Herlaad de reviews zodat de verwijderde review meteen verdwijnt
+                await this.loadReviews();
+            } else {
+                alert("Kon de review niet verwijderen.");
+            }
+        } catch (error) {
+            console.error("Fout bij verwijderen review:", error);
+            alert("Er is iets misgegaan bij het verwijderen: " + error.message);
         }
     }
 }

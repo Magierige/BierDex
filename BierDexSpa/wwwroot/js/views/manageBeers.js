@@ -163,8 +163,31 @@ export default class extends AbstractView {
 
     async handleEditSubmit(e) {
         e.preventDefault();
+
+        const submitBtn = e.target.querySelector('button[type="submit"]');
+        const errorEl = document.getElementById("edit-beer-error");
+
+        // Reset de foutmelding en zet de knop op bezig
+        if (errorEl) {
+            errorEl.textContent = "";
+        }
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.textContent = "BEZIG...";
+        }
+
         const id = document.getElementById("editBeerId").value;
         const beerIndex = this.beerData.findIndex(b => b.id == id);
+
+        // Mocht het bier om een of andere reden niet gevonden worden in de lokale array
+        if (beerIndex === -1) {
+            if (errorEl) errorEl.textContent = "Bier niet gevonden in lokale data.";
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.textContent = "OPSLAAN";
+            }
+            return;
+        }
 
         const updatedFields = {
             ...this.beerData[beerIndex],
@@ -173,30 +196,128 @@ export default class extends AbstractView {
             abv: document.getElementById("editAbv").value + '%'
         };
 
-        const serverResponse = await updateBeer(updatedFields);
-        if (serverResponse) {
-            this.beerData[beerIndex] = serverResponse;
-            this.renderBeers();
-            document.getElementById("editModal").classList.add("hidden");
+        try {
+            const serverResponse = await updateBeer(updatedFields);
+
+            if (serverResponse) {
+                this.beerData[beerIndex] = serverResponse;
+                this.renderBeers();
+                document.getElementById("editModal").classList.add("hidden");
+            }
+        } catch (error) {
+            let errorMessage = error.message;
+
+            // --- DE JSON CRUSHER ---
+            // Mocht C# een validatiefout (400 Bad Request) terugsturen, slopen we de JSON hier uit elkaar
+            if (errorMessage && errorMessage.trim().startsWith("{")) {
+                try {
+                    const parsedJson = JSON.parse(errorMessage);
+                    if (parsedJson.errors) {
+                        errorMessage = Object.values(parsedJson.errors).flat().join("\n");
+                    } else if (parsedJson.title) {
+                        errorMessage = parsedJson.title;
+                    }
+                } catch (p) {
+                    // Fallback naar originele message als parsen mislukt
+                }
+            }
+
+            // Standaard melding als er niets overblijft
+            if (!errorMessage || errorMessage.trim() === "") {
+                errorMessage = "Er is iets misgegaan bij het bijwerken van het bier.";
+            }
+
+            // Toon de fout in de modal
+            if (errorEl) {
+                errorEl.textContent = errorMessage;
+                errorEl.style.color = "#dc3545"; // Rood
+                errorEl.style.marginTop = "1rem";
+                errorEl.style.fontWeight = "bold";
+            } else {
+                alert(errorMessage);
+            }
+        } finally {
+            // Zet de knop altijd weer netjes terug
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.textContent = "OPSLAAN";
+            }
         }
     }
 
     async handleAddSubmit(e) {
         e.preventDefault();
+
+        const submitBtn = e.target.querySelector('button[type="submit"]');
+        const errorEl = document.getElementById("add-beer-error");
+
+        // 1. Reset eventuele oude fouten en zet de knop op 'bezig'
+        if (errorEl) {
+            errorEl.textContent = "";
+        }
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.textContent = "BEZIG...";
+        }
+
         const formData = new FormData(e.target);
         const rawAbv = formData.get("abv");
 
+        // 2. Formatteer ABV zodat deze voldoet aan de C# Regex (moet eindigen met %)
         if (rawAbv) {
-            const formattedAbv = `${parseFloat(rawAbv)}`;
-
+            const formattedAbv = `${parseFloat(rawAbv)}%`;
             formData.set("abv", formattedAbv);
         }
-        const newBeer = await createBeer(formData);
-        if (newBeer) {
-            this.beerData.push(newBeer);
-            this.renderBeers();
-            document.getElementById("addBeerModal").classList.add("hidden");
-            e.target.reset();
+
+        try {
+            // Verstuur de FormData (inclusief het bestand) naar je API
+            const newBeer = await createBeer(formData);
+
+            if (newBeer) {
+                this.beerData.push(newBeer);
+                this.renderBeers();
+                document.getElementById("addBeerModal").classList.add("hidden");
+                e.target.reset(); // Maak het formulier en de geselecteerde file leeg
+            }
+        } catch (error) {
+            let errorMessage = error.message;
+
+            // --- DE JSON CRUSHER ---
+            // Als de backend de invoer weigert (bijv. barcode te kort of geen afbeelding), 
+            // slopen we de JSON hier live uit elkaar.
+            if (errorMessage && errorMessage.trim().startsWith("{")) {
+                try {
+                    const parsedJson = JSON.parse(errorMessage);
+                    if (parsedJson.errors) {
+                        errorMessage = Object.values(parsedJson.errors).flat().join("\n");
+                    } else if (parsedJson.title) {
+                        errorMessage = parsedJson.title;
+                    }
+                } catch (p) {
+                    // Fallback naar de originele tekst als parsen mislukt
+                }
+            }
+
+            // Standaard tekst als de message leeg is gebleven
+            if (!errorMessage || errorMessage.trim() === "") {
+                errorMessage = "Er is iets misgegaan bij het toevoegen van het bier.";
+            }
+
+            // Toon de foutmelding netjes onderaan het formulier
+            if (errorEl) {
+                errorEl.textContent = errorMessage;
+                errorEl.style.color = "#dc3545"; // Rood
+                errorEl.style.marginTop = "1rem";
+                errorEl.style.fontWeight = "bold";
+            } else {
+                alert(errorMessage);
+            }
+        } finally {
+            // 3. Zet de knop ALTIJD weer terug in de originele staat
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.textContent = "BIER OPSLAAN";
+            }
         }
     }
 
