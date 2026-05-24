@@ -4,6 +4,7 @@ using BierDex.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
+using BierDex.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,7 +23,8 @@ builder.Services
     })
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<BierdexDBContext>()
-    .AddUserStore<MyUserStore>();
+    .AddUserStore<MyUserStore>()
+    .AddErrorDescriber<DutchIdentityErrorDescriber>();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
