@@ -1,6 +1,7 @@
 ﻿using BierDex.Controllers;
 using BierDex.Data;
 using BierDex.Models;
+using BierDex.Services; // Added to access BeerService
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -36,7 +37,6 @@ public class ReviewControllerTests
 
         _testUser = new IdentityUser { Id = "user-123", UserName = "Ronald" };
 
-        // Gecorrigeerd: Id met hoofdletter 'I'
         _testBeer = new Beer
         {
             Id = 1,
@@ -46,13 +46,18 @@ public class ReviewControllerTests
             abv = "10%",
             imagePath = "/images/grandprestige.png",
             slug = "hertog-jan-grand-prestige",
-            userId = "admin-id"
+            userId = "admin-id",
+            rating = 0.0 // Added property
         };
 
         _context.Beers.Add(_testBeer);
         _context.SaveChanges();
 
-        _controller = new ReviewController(_context, _mockUserManager.Object);
+        // FIX: Create a real or mocked instance of BeerService to satisfy the new constructor
+        var beerService = new BeerService(_context);
+
+        // Pass all 3 required arguments here
+        _controller = new ReviewController(_context, _mockUserManager.Object, beerService);
 
         var claims = new List<Claim> { new Claim(ClaimTypes.NameIdentifier, "user-123") };
         var identity = new ClaimsIdentity(claims, "TestAuthType");
@@ -74,7 +79,6 @@ public class ReviewControllerTests
     [Test]
     public async Task GetAllReviews_ShouldReturnAllReviewsFromDatabase()
     {
-        // Gecorrigeerd: We gebruiken de IdentityUser '_testUser' die je constructor verwacht
         var review = new Review("Lekker biertje!", 5, _testUser, _testBeer);
         _context.Reviews.Add(review);
         await _context.SaveChangesAsync();
@@ -106,7 +110,6 @@ public class ReviewControllerTests
     [Test]
     public async Task CreateReview_ValidRequest_ShouldReturnCreatedAtAction()
     {
-        // Gecorrigeerd: Id met hoofdletter 'I'
         var request = new ReviewCreateRequest("Heerlijk complex van smaak.", 5, _testBeer.Id);
         _mockUserManager.Setup(um => um.FindByIdAsync("user-123")).ReturnsAsync(_testUser);
 
@@ -143,7 +146,6 @@ public class ReviewControllerTests
     [Test]
     public async Task CreateReview_UserNotFoundInUserManager_ShouldReturnNotFound()
     {
-        // Gecorrigeerd: Id met hoofdletter 'I'
         var request = new ReviewCreateRequest("Prima pils", 4, _testBeer.Id);
         _mockUserManager.Setup(um => um.FindByIdAsync("user-123")).ReturnsAsync((IdentityUser)null!);
 

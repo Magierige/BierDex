@@ -59,7 +59,7 @@ export default class extends AbstractView {
             clone.querySelector('.beer-type').textContent = beer.type;
             clone.querySelector('.beer-abv').textContent = beer.abv;
             clone.querySelector('.beer-img').src = BeerService.getImageUrl(beer.imagePath);
-            clone.querySelector('.beer-rating').textContent = beer.rating || getRandomBeerRating();
+            clone.querySelector('.beer-rating').textContent = beer.rating;
 
             const detailLink = clone.querySelector('.beer-link');
             if (detailLink) {
