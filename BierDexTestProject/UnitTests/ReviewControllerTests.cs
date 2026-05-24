@@ -1,12 +1,13 @@
 ﻿using BierDex.Controllers;
 using BierDex.Data;
 using BierDex.Models;
-using BierDex.Services; // Added to access BeerService
+using BierDex.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Moq;
+using NuGet.ContentModel;
 using NUnit.Framework;
 using System.Collections.Generic;
 using System.Security.Claims;
@@ -22,6 +23,7 @@ public class ReviewControllerTests
     private ReviewController _controller;
     private IdentityUser _testUser;
     private Beer _testBeer;
+    private ClaimsPrincipal _claimsPrincipal;
 
     [SetUp]
     public void Setup()
@@ -47,25 +49,25 @@ public class ReviewControllerTests
             imagePath = "/images/grandprestige.png",
             slug = "hertog-jan-grand-prestige",
             userId = "admin-id",
-            rating = 0.0 // Added property
+            rating = 0.0
         };
 
         _context.Beers.Add(_testBeer);
         _context.SaveChanges();
 
-        // FIX: Create a real or mocked instance of BeerService to satisfy the new constructor
+        // Using a real BeerService since we are using InMemoryDatabase
         var beerService = new BeerService(_context);
 
-        // Pass all 3 required arguments here
         _controller = new ReviewController(_context, _mockUserManager.Object, beerService);
 
+        // Setup default user context (Regular Owner)
         var claims = new List<Claim> { new Claim(ClaimTypes.NameIdentifier, "user-123") };
         var identity = new ClaimsIdentity(claims, "TestAuthType");
-        var claimsPrincipal = new ClaimsPrincipal(identity);
+        _claimsPrincipal = new ClaimsPrincipal(identity);
 
         _controller.ControllerContext = new ControllerContext
         {
-            HttpContext = new DefaultHttpContext { User = claimsPrincipal }
+            HttpContext = new DefaultHttpContext { User = _claimsPrincipal }
         };
     }
 
@@ -74,6 +76,17 @@ public class ReviewControllerTests
     {
         _context.Database.EnsureDeleted();
         _context.Dispose();
+    }
+
+    private void SetupUserRole(string role)
+    {
+        var claims = new List<Claim>
+        {
+            new Claim(ClaimTypes.NameIdentifier, "user-123"),
+            new Claim(ClaimTypes.Role, role)
+        };
+        var identity = new ClaimsIdentity(claims, "TestAuthType");
+        _controller.ControllerContext.HttpContext.User = new ClaimsPrincipal(identity);
     }
 
     [Test]
@@ -156,5 +169,78 @@ public class ReviewControllerTests
         var notFoundResult = result.Result as NotFoundObjectResult;
         Assert.That(notFoundResult, Is.Not.Null);
         Assert.That(notFoundResult.Value, Is.EqualTo("User not found."));
+    }
+
+    // --- NEW: Tests for DeleteReview ---
+
+    [Test]
+    public async Task DeleteReview_ReviewNotFound_ShouldReturnNotFound()
+    {
+        // Act
+        var result = await _controller.DeleteReview(999);
+
+        // Assert
+        var notFoundResult = result as NotFoundObjectResult;
+        Assert.That(notFoundResult, Is.Not.Null);
+        Assert.That(notFoundResult.Value, Is.EqualTo("Review niet gevonden."));
+    }
+
+    [Test]
+    public async Task DeleteReview_UserIsOwner_ShouldReturnNoContent()
+    {
+        // Arrange
+        var review = new Review("Mijn review", 4, _testUser, _testBeer);
+        _context.Reviews.Add(review);
+        await _context.SaveChangesAsync();
+
+        // Act
+        var result = await _controller.DeleteReview(review.Id);
+
+        // Assert
+        Assert.That(result, Is.TypeOf<NoContentResult>());
+        var dbReview = await _context.Reviews.FindAsync(review.Id);
+        Assert.That(dbReview, Is.Null);
+    }
+
+    [Test]
+    public async Task DeleteReview_UserIsAdminButNotOwner_ShouldReturnNoContent()
+    {
+        // Arrange
+        var strangerUser = new IdentityUser { Id = "stranger-danger", UserName = "Henk" };
+        var review = new Review("Niet mijn review", 3, strangerUser, _testBeer);
+        _context.Reviews.Add(review);
+        await _context.SaveChangesAsync();
+
+        // Change current context user to an Admin (still ID 'user-123')
+        SetupUserRole("Admin");
+
+        // Act
+        var result = await _controller.DeleteReview(review.Id);
+
+        // Assert
+        Assert.That(result, Is.TypeOf<NoContentResult>());
+        var dbReview = await _context.Reviews.FindAsync(review.Id);
+        Assert.That(dbReview, Is.Null);
+    }
+
+    [Test]
+    public async Task DeleteReview_UserNotOwnerAndNotAdmin_ShouldReturnForbid()
+    {
+        // Arrange
+        var strangerUser = new IdentityUser { Id = "stranger-danger", UserName = "Henk" };
+        var review = new Review("Niet mijn review", 3, strangerUser, _testBeer);
+        _context.Reviews.Add(review);
+        await _context.SaveChangesAsync();
+
+        // Act
+        var result = await _controller.DeleteReview(review.Id);
+
+        // Assert
+        var forbidResult = result as ForbidResult;
+        Assert.That(forbidResult, Is.Not.Null);
+
+        // Ensure it wasn't accidentally deleted
+        var dbReview = await _context.Reviews.FindAsync(review.Id);
+        Assert.That(dbReview, Is.Not.Null);
     }
 }
