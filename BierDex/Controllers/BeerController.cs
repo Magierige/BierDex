@@ -116,7 +116,7 @@ namespace BierDex.Controllers
             {
                 name = beer.name,
                 type = beer.type,
-                abv = beer.abv.ToString() + "%",
+                abv = beer.abv.ToString(),
                 imagePath = savedImagePath,
                 approved = false, // New beers are not approved by default
                 userId = userId,

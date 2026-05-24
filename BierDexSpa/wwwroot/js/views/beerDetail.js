@@ -48,7 +48,7 @@ export default class extends AbstractView {
 
             // Rating en andere details
             if (document.getElementById('beer-detail-rating')) {
-                document.getElementById('beer-detail-rating').textContent = beer.rating || getRandomBeerRating();;
+                document.getElementById('beer-detail-rating').textContent = beer.rating;
             }
 
             const form = document.getElementById('review-form');
