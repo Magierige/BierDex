@@ -31,11 +31,13 @@ namespace BierDex.Controllers
     {
         private readonly BierdexDBContext _context;
         private readonly UserManager<IdentityUser> _userManager;
+        private readonly BeerService _beerService;
 
-        public ReviewController(BierdexDBContext context, UserManager<IdentityUser> userManager)
+        public ReviewController(BierdexDBContext context, UserManager<IdentityUser> userManager, BeerService beerService)
         {
             _context = context;
             _userManager = userManager;
+            _beerService = beerService;
         }
 
         [HttpGet("all")]
@@ -88,6 +90,8 @@ namespace BierDex.Controllers
 
             _context.Reviews.Add(review);
             await _context.SaveChangesAsync();
+
+            await _beerService.UpdateAndGetBeerAverageRatingAsync(beer.Id);
 
             return CreatedAtAction(nameof(GetReviewByBeerId), new { id = review.BeerId }, review);
         }

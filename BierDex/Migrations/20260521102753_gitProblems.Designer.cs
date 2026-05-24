@@ -3,6 +3,7 @@ using System;
 using BierDex.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace BierDex.Migrations
 {
     [DbContext(typeof(BierdexDBContext))]
-    partial class BierdexDBContextModelSnapshot : ModelSnapshot
+    [Migration("20260521102753_gitProblems")]
+    partial class gitProblems
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -49,9 +52,6 @@ namespace BierDex.Migrations
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
-
-                    b.Property<double>("rating")
-                        .HasColumnType("double precision");
 
                     b.Property<string>("slug")
                         .IsRequired()

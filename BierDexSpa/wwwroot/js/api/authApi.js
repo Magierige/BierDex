@@ -87,16 +87,23 @@ export async function register(email, password) {
         let message = "Registreren mislukt.";
         try {
             const problem = await response.json();
-            if (problem && problem.title) {
+
+            // Dit lost jouw exacte probleem op:
+            if (problem && problem.errors) {
+                // `Object.values(problem.errors)` geeft een array van arrays: [["fout1"], ["fout2"]]
+                // `.flat()` maakt er één platte lijst van: ["fout1", "fout2"]
+                // `.join("<br>")` zet ze onder elkaar, of gebruiken ".join(' ')" voor achter elkaar
+                message = Object.values(problem.errors).flat().join(" ");
+            } else if (problem && problem.title) {
                 message = problem.title;
             }
         } catch {
+            // Fallback als de response geen JSON is
         }
         throw new Error(message);
-    } else {
-        login(email, password);
     }
 
+    await login(email, password);
 }
 
 export async function forgotPassword(email) {

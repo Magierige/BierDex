@@ -105,5 +105,29 @@ namespace BierDex.Services
 
             return $"{slug}-{i}";
         }
+
+        public async Task<double> UpdateAndGetBeerAverageRatingAsync(int beerId)
+        {
+            var beer = await _context.Beers.FindAsync(beerId);
+            if (beer == null) return 0.0;
+
+            var hasReviews = await _context.Reviews.AnyAsync(r => r.BeerId == beerId);
+            if (!hasReviews)
+            {
+                beer.rating = 0.0;
+                await _context.SaveChangesAsync();
+                return 0.0;
+            }
+
+            double average = await _context.Reviews
+                .Where(r => r.BeerId == beerId)
+                .AverageAsync(r => r.Rating);
+
+            // Save the 1-decimal average back to the Beer record
+            beer.rating = Math.Round(average, 1);
+            await _context.SaveChangesAsync();
+
+            return beer.rating;
+        }
     }
 }
