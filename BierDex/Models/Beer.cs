@@ -32,6 +32,8 @@ namespace BierDex.Models
             ErrorMessage = "Ongeldig formaat. Gebruik bijv. '5%', '5.5%' of '100%'")]
         public string abv { get; set; }
 
+        public double rating { get; set; } = 0.0;
+
         public bool approved { get; set; } = false;
 
         public string slug { get; set; }

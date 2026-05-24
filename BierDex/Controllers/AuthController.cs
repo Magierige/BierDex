@@ -72,17 +72,22 @@ namespace API.Controllers
             if (model == null || string.IsNullOrEmpty(model.Email))
                 return BadRequest("Email en wachtwoord zijn verplicht.");
 
-            // Zoek de gebruiker op basis van email
-            var user = await _userManager.FindByEmailAsync(model.Email);
+            // Clean up the email string to remove any hidden null byte characters or whitespace
+            var sanitizedEmail = model.Email.Replace("\0", "").Trim();
+
+            // Do the same for the password just in case it suffers from the same issue
+            var sanitizedPassword = model.Password?.Replace("\0", "") ?? "";
+
+            // Zoek de gebruiker op basis van de opgeschoonde email
+            var user = await _userManager.FindByEmailAsync(sanitizedEmail);
 
             if (user == null)
                 return Unauthorized("Ongeldige inloggegevens.");
 
             // Gebruik de SignInManager om in te loggen met de gevonden Username
-            // We gebruiken user.UserName omdat Identity intern matcht op de UserName kolom
             var result = await _signInManager.PasswordSignInAsync(
                 user.UserName!,
-                model.Password,
+                sanitizedPassword,
                 model.RememberMe,
                 lockoutOnFailure: false);
 
