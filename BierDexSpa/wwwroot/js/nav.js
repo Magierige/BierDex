@@ -2,14 +2,29 @@
 
 async function getGuestNav() {
     const response = await fetch("/navGuest.html");
-    const html = await response.text();
-    return html;
+    return await response.text();
 }
 
 async function getNav() {
     const response = await fetch("/nav.html");
-    const html = await response.text();
-    return html;
+    return await response.text();
+}
+
+// Hulpfunctie om het mobiele menu te toggelen met de juiste ARIA-statussen
+function setupMobileMenu() {
+    const btn = document.getElementById("mobile-menu-button");
+    const menu = document.getElementById("mobile-menu");
+
+    if (btn && menu) {
+        // Verwijder oude listeners om dubbele events te voorkomen bij herladen
+        const newBtn = btn.cloneNode(true);
+        btn.parentNode.replaceChild(newBtn, btn);
+
+        newBtn.addEventListener("click", () => {
+            const isHidden = menu.classList.toggle("hidden");
+            newBtn.setAttribute("aria-expanded", !isHidden);
+        });
+    }
 }
 
 export async function loadNavBar() {
@@ -20,39 +35,31 @@ export async function loadNavBar() {
         nav.innerHTML = await getNav();
 
         // 1. Setup Mobile Toggle Logic
-        const btn = document.getElementById("mobile-menu-button");
-        const menu = document.getElementById("mobile-menu");
-        if (btn && menu) {
-            btn.onclick = () => menu.classList.toggle("hidden");
-        }
+        setupMobileMenu();
 
         // 2. Handle Higher User Links (Desktop AND Mobile)
-        if (await isHigherUser()) {
-            const containers = ["nav-links", "nav-links-mobile"];
-            
-            containers.forEach(id => {
-                const container = document.getElementById(id);
-                if (container && !document.getElementById(`${id}-manage-beer`)) {
-                    const li = document.createElement("li");
-                    li.id = `${id}-manage-beer`;
-                    li.innerHTML = `<a class="hover:text-amber-600 transition-colors" href="/manage-beers">Manage Beers</a>`;
-                    container.appendChild(li);
-                }
-            });
-        }
-        if (await isAdmin()) {
-            const containers = ["nav-links", "nav-links-mobile"];
+        const isHigher = await isHigherUser();
+        const isAnAdmin = await isAdmin();
+        const containers = ["nav-links", "nav-links-mobile"];
 
-            containers.forEach(id => {
-                const container = document.getElementById(id);
-                if (container && !document.getElementById(`${id}-create-user`)) {
-                    const li = document.createElement("li");
-                    li.id = `${id}-create-user`;
-                    li.innerHTML = `<a class="hover:text-amber-600 transition-colors" href="/create-user">Create User</a>`;
-                    container.appendChild(li);
-                }
-            });
-        }
+        containers.forEach(id => {
+            const container = document.getElementById(id);
+            if (!container) return;
+
+            if (isHigher && !document.getElementById(`${id}-manage-beer`)) {
+                const li = document.createElement("li");
+                li.id = `${id}-manage-beer`;
+                li.innerHTML = `<a class="hover:text-amber-600 transition-colors" href="/manage-beers">Manage Beers</a>`;
+                container.appendChild(li);
+            }
+
+            if (isAnAdmin && !document.getElementById(`${id}-create-user`)) {
+                const li = document.createElement("li");
+                li.id = `${id}-create-user`;
+                li.innerHTML = `<a class="hover:text-amber-600 transition-colors" href="/create-user">Create User</a>`;
+                container.appendChild(li);
+            }
+        });
 
         // 3. Update Usernames
         const username = await getUsername();
@@ -74,24 +81,15 @@ export async function loadNavBar() {
         document.getElementById("logout-btn-mobile")?.addEventListener("click", handleLogout);
 
     } else {
-        const guestContent = await getGuestNav();
-        nav.innerHTML = guestContent;
-
+        nav.innerHTML = await getGuestNav();
         // Re-attach the toggle logic for the Guest menu
-        const btn = document.getElementById("mobile-menu-button");
-        const menu = document.getElementById("mobile-menu");
-
-        if (btn && menu) {
-            btn.addEventListener("click", () => {
-                menu.classList.toggle("hidden");
-            });
-        }
+        setupMobileMenu();
     }
 }
 
-window.addEventListener("auth-changed", (event) => {
-    loadNavBar(); // Herlaad de balk direct als de status verandert
+window.addEventListener("auth-changed", () => {
+    loadNavBar();
 });
 
-// Eerste keer laden bij het opstarten van de pagina
+// Eerste keer laden
 loadNavBar();
